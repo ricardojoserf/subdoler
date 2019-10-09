@@ -6,7 +6,7 @@ import argparse
 def get_args():
   parser = argparse.ArgumentParser()
   parser.add_argument('-i', '--input_file', required=True, action='store', help='Input file')
-  parser.add_argument('-o', '--output_file', default="results", required=False, action='store', help='Output folder')
+  parser.add_argument('-o', '--output_file', default="results", required=False, action='store', help='Output file')
   my_args = parser.parse_args()
   return my_args
 
@@ -89,12 +89,12 @@ def extract_domains(output_file):
 		dominio = i.split(".")[len(i.split("."))-2]+"."+i.split(".")[len(i.split("."))-1]
 		if dominio not in dom_arr:
 			dom_arr.append(dominio)
-	print "\nNumber of domains: ", len(dom_arr)
-	print "------ Domains --------"
-	print "-----------------------"
+	print "\nNumber of main domains: ", len(dom_arr)
+	print "------------------------"
+	print "----- Main Domains -----"
 	for d in dom_arr:
 		print d
-	print "-----------------------"
+	print "------------------------"
 
 
 def main():

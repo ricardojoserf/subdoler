@@ -14,6 +14,7 @@ findsubdomain_output_file 	= config.findsubdomain_output_file
 dnsdumpster_output_file   	= config.dnsdumpster_output_file
 gobuster_output_file   	  	= config.gobuster_output_file
 fdns_output_file   	  		= config.fdns_output_file
+merged_output_file			= config.merged_output_file
 ipv4info_script_file 		= config.ipv4info_script_file
 findsubdomain_script_file 	= config.findsubdomain_script_file
 dnsdumpster_script_file 	= config.dnsdumpster_script_file
@@ -27,8 +28,7 @@ ipv4info_token 				= config.ipv4info_token
 def get_args():
   parser = argparse.ArgumentParser()
   parser.add_argument('-i', '--input_file', required=True, action='store', help='Input file')
-  parser.add_argument('-o', '--output_file', default="result.txt", required=False, action='store', help='Output file')
-  parser.add_argument('-c', '--csv_file', default="result.csv", required=False, action='store', help='Csv file')
+  parser.add_argument('-o', '--output_file', default="result.csv", required=False, action='store', help='Csv file')
   my_args = parser.parse_args()
   return my_args
 
@@ -51,11 +51,11 @@ def create_commands(domains_file):
 	comandos = []
 	comandos.append({"titulo":"Borrando ficheros temporales", "comando":"touch /tmp/dummy_temp; ls /tmp/*_temp; rm /tmp/*_temp; exit", "active": True})
 	comandos.append({"titulo":"Amass - Passive Scan Mode", "comando": amass_cmd, "active": True})
-	comandos.append({"titulo":"Findsubdomain - Subdomains", "comando": findsubdomain_cmd, "active": True})
-	comandos.append({"titulo":"IPv4info - Subdomains", "comando": ipv4info_cmd, "active": True})
-	comandos.append({"titulo":"DNSDumpster - Subdomains", "comando": dnsdumpster_cmd, "active": True})
+	comandos.append({"titulo":"Findsubdomain - Subdomains", "comando": findsubdomain_cmd, "active": False})
+	comandos.append({"titulo":"IPv4info - Subdomains", "comando": ipv4info_cmd, "active": False})
+	comandos.append({"titulo":"DNSDumpster - Subdomains", "comando": dnsdumpster_cmd, "active": False})
 	comandos.append({"titulo":"Gobuster - Subdomain bruteforce", "comando": gobuster_cmd, "active": True})
-	comandos.append({"titulo":"FDNS - Subdomain lister", "comando": fdns_cmd, "active": True})
+	comandos.append({"titulo":"FDNS - Subdomain lister", "comando": fdns_cmd, "active": False})
 	return comandos
 
 
@@ -65,13 +65,13 @@ def exec_commands(comandos):
 			os.system('gnome-terminal -q -- bash -c "echo; echo {0}; echo; {1}; exec bash" 2>/dev/null'.format(i["titulo"],i["comando"]))
 
 
-def join_files(final_output):
-	os.system("cat /tmp/*_temp_* | sed -e 's/Found: //g' | sort -u > "+final_output)
+def join_files():
+	os.system("cat /tmp/*_temp_* | sed -e 's/Found: //g' | sort -u > "+merged_output_file)
 
 
-def show_info(final_output, csv_file):
+def show_info(output_file):
 	csv_arr = []
-	subdoms = open(final_output).read().splitlines()
+	subdoms = open(merged_output_file).read().splitlines()
 	print "\nNumber of subdomains: ", len(subdoms)
 	dom_arr = []
 	print "\nSubdominios: "
@@ -97,7 +97,7 @@ def show_info(final_output, csv_file):
 	print "\nDominios: "
 	for d in dom_arr:
 		print "- ", d
-	with open(csv_file, 'wb') as myfile:
+	with open(output_file, 'wb') as myfile:
 		wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
 		for row in csv_arr:
 			wr.writerow(row)
@@ -106,12 +106,12 @@ def show_info(final_output, csv_file):
 def main():
 	args = get_args()
 	domains_file = args.input_file
-	final_output = args.output_file
+	output_file = args.output_file
 	comandos = create_commands(domains_file)
 	exec_commands(comandos)
 	raw_input("\n\nPress Enter to continue when everything is Finished...")
-	join_files(final_output)
-	show_info(final_output, args.csv_file)
+	join_files()
+	show_info(output_file)
 
 
 main()
