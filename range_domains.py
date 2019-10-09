@@ -109,4 +109,5 @@ def main():
 	extract_domains(output_file)
 
 
-main()
+if __name__== "__main__":
+	main()

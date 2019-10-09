@@ -1,1 +1,18 @@
-# subdoler
+# Subdoler (nombre provisional)
+
+*"Subdoler: porque listar subdominios no tiene que doler"*
+
+...
+
+...
+
+...
+
+...
+
+...
+
+...
+
+
+no puede no haberte hecho gracia el chiste D:

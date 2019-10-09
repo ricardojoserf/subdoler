@@ -1,4 +1,5 @@
-import sys,os
+import sys
+import os
 import subprocess
 import argparse
 import socket
@@ -7,22 +8,23 @@ import config
 
 
 ################ Configuration file ##################
-tmp_folder = 				  config.tmp_folder
-amass_output_file 		  	= config.amass_output_file
-ipv4info_output_file 	  	= config.ipv4info_output_file
-findsubdomain_output_file 	= config.findsubdomain_output_file
-dnsdumpster_output_file   	= config.dnsdumpster_output_file
-gobuster_output_file   	  	= config.gobuster_output_file
-fdns_output_file   	  		= config.fdns_output_file
-merged_output_file			= config.merged_output_file
-ipv4info_script_file 		= config.ipv4info_script_file
-findsubdomain_script_file 	= config.findsubdomain_script_file
-dnsdumpster_script_file 	= config.dnsdumpster_script_file
-gobuster_dictionary 		= config.gobuster_dictionary
-fdns_file 					= config.fdns_file
-gobuster_threads 			= config.gobuster_threads
-findsubdomain_token 		= config.findsubdomain_token 
-ipv4info_token 				= config.ipv4info_token 
+tmp_folder                  = config.tmp_folder
+amass_output_file           = config.amass_output_file
+ipv4info_output_file        = config.ipv4info_output_file
+findsubdomain_output_file   = config.findsubdomain_output_file
+dnsdumpster_output_file     = config.dnsdumpster_output_file
+gobuster_output_file        = config.gobuster_output_file
+fdns_output_file            = config.fdns_output_file
+merged_output_file          = config.merged_output_file
+ipv4info_script_file        = config.ipv4info_script_file
+findsubdomain_script_file   = config.findsubdomain_script_file
+dnsdumpster_script_file     = config.dnsdumpster_script_file
+gobuster_dictionary         = config.gobuster_dictionary
+fdns_file                   = config.fdns_file
+gobuster_threads            = config.gobuster_threads
+findsubdomain_token         = config.findsubdomain_token 
+ipv4info_token              = config.ipv4info_token 
+######################################################
 
 
 def get_args():
@@ -43,8 +45,10 @@ def create_commands(domains_file):
 	ipv4info_cmd = 		"python "+ipv4info_script_file+" -f "+domains_file+" -a "+ipv4info_token+" -o "+ipv4info_output_file + "; echo "+"; echo Finished" #+ "; exit"
 	dnsdumpster_cmd = 	"python "+dnsdumpster_script_file+" -f "+domains_file+" -o "+dnsdumpster_output_file + "; echo "+"; echo Finished" #+ "; exit"
 	gobuster_cmd = ""
-	for d in read_domains(domains_file):
-		gobuster_cmd += "echo "+d+"; echo; gobuster dns -t "+str(gobuster_threads)+" -w "+gobuster_dictionary+" -d "+d+" -o "+gobuster_output_file+"_"+d+"; "
+	domains = read_domains(domains_file)
+	for d in range(0, len(domains)):
+		domain = domains[d]
+		gobuster_cmd += "echo; echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; echo; gobuster dns -t "+str(gobuster_threads)+" -w "+gobuster_dictionary+" -d "+domain+" -o "+gobuster_output_file+"_"+domain+"; "
 	gobuster_cmd += " echo ; echo Finished" + "; exit"
 	fdns_cmd = "zcat "+fdns_file+" | egrep '(" + "|".join(read_domains(domains_file)) + ")' | tee "+fdns_output_file #+ "; exit"
 	#############
@@ -69,13 +73,16 @@ def join_files():
 	os.system("cat /tmp/*_temp_* | sed -e 's/Found: //g' | sort -u > "+merged_output_file)
 
 
-def show_info(output_file):
+def generate_output(output_file):
 	csv_arr = []
 	subdoms = open(merged_output_file).read().splitlines()
-	print "\nNumber of subdomains: ", len(subdoms)
 	dom_arr = []
-	print "\nSubdominios: "
+	print "\nNumber of subdomains: ", len(subdoms)
+	print "------------------------"
+	print "------ Subdomains ------"
+	print "------------------------"
 	for i in subdoms:
+		print i
 		try:
 			ip_dominio =  subprocess.Popen(["dig", "+short", i], stdout=subprocess.PIPE).communicate()[0].replace("\n"," ")
 		except:
@@ -89,14 +96,7 @@ def show_info(output_file):
 			reverse_dns = ""
 		csv_line = [i,ip_dominio,reverse_dns]
 		csv_arr.append(csv_line)
-		print csv_line
-		dominio = i.split(".")[len(i.split("."))-2]+"."+i.split(".")[len(i.split("."))-1]
-		if dominio not in dom_arr:
-			dom_arr.append(dominio)
-	print "\nNumber of domains: ", len(dom_arr)
-	print "\nDominios: "
-	for d in dom_arr:
-		print "- ", d
+	print "------------------------"
 	with open(output_file, 'wb') as myfile:
 		wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
 		for row in csv_arr:
@@ -109,9 +109,10 @@ def main():
 	output_file = args.output_file
 	comandos = create_commands(domains_file)
 	exec_commands(comandos)
-	raw_input("\n\nPress Enter to continue when everything is Finished...")
+	raw_input("\nPress Enter to continue when everything is Finished...")
 	join_files()
-	show_info(output_file)
+	generate_output(output_file)
 
 
-main()
+if __name__== "__main__":
+	main()
