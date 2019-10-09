@@ -25,77 +25,59 @@ def get_base(val, index):
 
 
 def resolve_ip(ip_addr, output_file):
-	#print ip_addr
-	comando = "a=$(nslookup " + ip_addr +" | grep name | awk '{print $4}'); if [ ${#a} -ge 1 ]; then echo "+ ip_addr +" - $a; echo $a | tr ' ' '\n' | sed -e 's/.$//' >> "+output_file+"; fi;"
+	comando = "a=$(nslookup " + ip_addr +" | grep name | awk '{print $4}'); if [ ${#a} -ge 1 ]; then echo "+ ip_addr +" - $a | sed -e 's/.$//'; echo $a | tr ' ' '\n' | sed -e 's/.$//' >> "+output_file+"; fi;"
 	os.system(comando)	
+
 
 def create_command(arr_points, length_, output_file):
 	final_cmd = ""
 	if length_ < 8:
 		aux1 = 8 - length_
-		aux4 = 8 - aux1
-		conflictive_one = get_base(int(arr_points[0]), int(aux4))
-		aux5 = 2**aux1 - 1
-		aux6 = conflictive_one + aux5
-		first_ip = str(conflictive_one) + ".0.0.0"
-		last_ip  = str(aux6) + ".255.255.255"
+		first_ = get_base(int(arr_points[0]), int(8 - aux1))
+		last_ = first_ + 2**aux1 - 1
+		first_ip = str(first_) + ".0.0.0"
+		last_ip  = str(last_) + ".255.255.255"
 		print "\n[debug] Range: "+first_ip+"-"+last_ip
-		for j in range(conflictive_one, aux6):
+		for j in range(first_, last_):
 			for i in range(0,255):
 				for h in range(0,255):
 					for g in range(0,255):
-						### print str(j) + "." + str(i) + "." + str(h) + "." + str(g)
 						resolve_ip(str(j) + "." + str(i) + "." + str(h) + "." + str(g), output_file)
-		#final_cmd = "for j in $(seq "+str(conflictive_one)+" "+str(aux6)+"); do for i in $(seq 0 255); do for h in $(seq 0 255); do for g in $(seq 0 255); do a=$(nslookup $j.$i.$h.$g | grep name | awk '{print $4}'); if [ ! -z $a ]; then echo $j.$i.$h.$g - $a; fi; done; done; done; done" + " | sed -e 's/.$//' | tee " + output_file + ".1"
 	elif length_ < 16:
 		aux1 = 16 - length_
-		aux4 = 8 - aux1
-		conflictive_one = get_base(int(arr_points[1]), int(aux4))
-		aux5 = 2**aux1 - 1
-		aux6 = conflictive_one + aux5
-		first_ip = arr_points[0] + "." + str(conflictive_one) + ".0.0"
-		last_ip  = arr_points[0] + "." + str(aux6) + ".255.255"
+		first_ = get_base(int(arr_points[1]), int(8 - aux1))
+		last_ = first_ + 2**aux1 - 1
+		first_ip = arr_points[0] + "." + str(first_) + ".0.0"
+		last_ip  = arr_points[0] + "." + str(last_) + ".255.255"
 		print "\n[debug] Range: "+first_ip+"-"+last_ip
-		for j in range(conflictive_one, aux6):
+		for j in range(first_, last_):
 			for i in range(0,255):
 				for h in range(0,255):
-					### print arr_points[0]+"."+ str(j) + "." + str(i) + "." + str(h)
 					resolve_ip(arr_points[0]+"."+ str(j) + "." + str(i) + "." + str(h), output_file)
-					# os.system("a=$(nslookup " + arr_points[0]+"."+ str(j) + "." + str(i) + "." + str(h) +" | grep name | awk '{print $4}'); if [ ! -z $a ]; then echo "+ arr_points[0]+"."+ str(j) + "." + str(i) + "." + str(h) +" - $a; fi;")
-		#final_cmd = "for j in $(seq "+str(conflictive_one)+" "+str(aux6)+"); do for i in $(seq 0 255); do for h in $(seq 0 255); do a=$(nslookup "+arr_points[0]+".$j.$i.$h | grep name | awk '{print $4}'); if [ ! -z $a ]; then echo "+arr_points[0]+".$j.$i.$h - $a; fi; done; done; done" + " | sed -e 's/.$//' | tee " + output_file + ".2"		
 	elif length_ < 24:
 		aux1 = 24 - length_
-		aux4 = 8 - aux1
-		conflictive_one = get_base(int(arr_points[2]), int(aux4))
-		aux5 = 2**aux1 - 1
-		aux6 = conflictive_one + aux5
-		first_ip = arr_points[0] + "." + arr_points[1] + "." + str(conflictive_one) + ".0"
-		last_ip  = arr_points[0] + "." + arr_points[1] + "." + str(aux6) + ".255"
+		first_ = get_base(int(arr_points[2]), int(8 - aux1))
+		last_ = first_ + 2**aux1 - 1
+		first_ip = arr_points[0] + "." + arr_points[1] + "." + str(first_) + ".0"
+		last_ip  = arr_points[0] + "." + arr_points[1] + "." + str(last_) + ".255"
 		print "\n[debug] Range: "+first_ip+"-"+last_ip
-		for j in range(conflictive_one, aux6):
+		for j in range(first_, last_):
 			for i in range(0,255):
-				### print arr_points[0]+"."+arr_points[1] + "." + str(j) + "." + str(i)
 				resolve_ip(arr_points[0]+"."+arr_points[1] + "." + str(j) + "." + str(i), output_file)
-				# os.system("a=$(nslookup " + arr_points[0]+"."+arr_points[1] + "." + str(j) + "." + str(i) +" | grep name | awk '{print $4}'); if [ ! -z $a ]; then echo "+ arr_points[0]+"."+arr_points[1] + "." + str(j) + "." + str(i) +" - $a; fi;")
-		#final_cmd = "for j in $(seq "+str(conflictive_one)+" "+str(aux6)+"); do for i in $(seq 0 255); do a=$(nslookup "+arr_points[0]+"."+arr_points[1]+".$j.$i | grep name | awk '{print $4}'); if [ ! -z $a ]; then echo "+arr_points[0]+"."+arr_points[1]+".$j.$i - $a; fi; done; done"  + " | sed -e 's/.$//' | tee " + output_file + ".3"
 	elif length_ < 32:
 		aux1 = 32 - length_
-		aux4 = 8 - aux1
-		conflictive_one = get_base(int(arr_points[3]), int(aux4))
-		aux5 = 2**aux1 - 1
-		aux6 = conflictive_one + aux5
-		first_ip = arr_points[0] + "." + arr_points[1] + "."  + arr_points[2] + "."  + str(conflictive_one)
-		last_ip  = arr_points[0] + "." + arr_points[1] + "."  + arr_points[2] + "."  + str(aux6)
+		first_ = get_base(int(arr_points[3]), int(8 - aux1))
+		last_ = first_ + 2**aux1 - 1
+		first_ip = arr_points[0] + "." + arr_points[1] + "."  + arr_points[2] + "."  + str(first_)
+		last_ip  = arr_points[0] + "." + arr_points[1] + "."  + arr_points[2] + "."  + str(last_)
 		print "\n[debug] Range: "+first_ip+"-"+last_ip
-		for j in range(conflictive_one, aux6):
-			### print arr_points[0]+"." + arr_points[1] + "." + arr_points[2] + "." + str(j)
+		for j in range(first_, last_):
 			resolve_ip(arr_points[0] + "." + arr_points[1] + "." + arr_points[2] + "." + str(j), output_file)
-			# os.system("a=$(nslookup " + arr_points[0] + "." + arr_points[1] + "." + arr_points[2] + "." + str(j) +" | grep name | awk '{print $4}'); if [ ! -z $a ]; then echo "+ arr_points[0]+"."+arr_points[1] + "." + arr_points[2] + "." + str(j) +" - $a; fi;")
-		#final_cmd = "for j in $(seq "+str(conflictive_one)+" "+str(aux6)+"); do a=$(nslookup "+arr_points[0]+"."+arr_points[1]+"."+arr_points[2]+".$j | grep name | awk '{print $4}'); if [ ! -z $a ]; then echo "+arr_points[0]+"."+arr_points[1]+"."+arr_points[2]+".$j - $a; fi; done" + " | sed -e 's/.$//' | tee " + output_file + ".4"
+	elif length_ == 32:
+		resolve_ip(arr_points[0] + "." + arr_points[1] + "." + arr_points[2] + "." + arr_points[3], output_file)
 	else:
 		print "Wrong IP format"
 		sys.exit(1)
-	#return final_cmd
 
 
 def extract_domains(output_file):
@@ -108,9 +90,11 @@ def extract_domains(output_file):
 		if dominio not in dom_arr:
 			dom_arr.append(dominio)
 	print "\nNumber of domains: ", len(dom_arr)
-	print "\nDominios: "
+	print "------ Domains --------"
+	print "-----------------------"
 	for d in dom_arr:
-		print "- ", d
+		print d
+	print "-----------------------"
 
 
 def main():
@@ -121,11 +105,7 @@ def main():
 	for r in ranges:
 		length_ = int(r.split("/")[1])
 		arr_points = r.split("/")[0].split(".")
-		#final_cmd = create_command(arr_points, length_, output_file)
-		#os.system(final_cmd)
 		create_command(arr_points, length_, output_file)
-		#os.system("cat "+output_file+ ".* | awk '{ print $ 3}' >> "+output_file+" ")
-	
 	extract_domains(output_file)
 
 
