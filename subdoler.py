@@ -41,10 +41,10 @@ def read_domains(domains_file):
 
 
 def create_commands(domains_file):
-	amass_cmd = 		"amass enum --passive -d "+",".join(read_domains(domains_file))+" -o "+amass_output_file + "; echo "+"; echo Finished" #+ "; exit"
+	amass_cmd =         "amass enum --passive -d "+",".join(read_domains(domains_file))+" -o "+amass_output_file + "; echo "+"; echo Finished" #+ "; exit"
 	findsubdomain_cmd = "python "+findsubdomain_script_file+" -f "+domains_file+" -a "+findsubdomain_token+" -o "+findsubdomain_output_file + "; echo "+"; echo Finished" #+ "; exit"
-	ipv4info_cmd = 		"python "+ipv4info_script_file+" -f "+domains_file+" -a "+ipv4info_token+" -o "+ipv4info_output_file + "; echo "+"; echo Finished" #+ "; exit"
-	dnsdumpster_cmd = 	"python "+dnsdumpster_script_file+" -f "+domains_file+" -o "+dnsdumpster_output_file + "; echo "+"; echo Finished" #+ "; exit"
+	ipv4info_cmd =      "python "+ipv4info_script_file+" -f "+domains_file+" -a "+ipv4info_token+" -o "+ipv4info_output_file + "; echo "+"; echo Finished" #+ "; exit"
+	dnsdumpster_cmd =   "python "+dnsdumpster_script_file+" -f "+domains_file+" -o "+dnsdumpster_output_file + "; echo "+"; echo Finished" #+ "; exit"
 	fdns_cmd =          "zcat "+fdns_file+" | egrep '(" + "|".join(read_domains(domains_file)) + ")' | tee "+fdns_output_file #+ "; exit"
 	gobuster_cmd =      ""
 	theharvester_cmd =  ""
