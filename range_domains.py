@@ -92,6 +92,7 @@ def extract_domains(output_file):
 	print "\nNumber of main domains: ", len(dom_arr)
 	print "------------------------"
 	print "----- Main Domains -----"
+	print "------------------------"
 	for d in dom_arr:
 		print d
 	print "------------------------"
