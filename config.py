@@ -1,3 +1,12 @@
+# Options 
+amass_active                = True
+findsubdomain_active        = True
+ipv4info_active             = False
+dnsdumpster_active          = False
+fdns_active                 = False
+gobuster_active             = False
+theharvester_active         = False
+pwndb_active                = False
 # Tokens
 findsubdomain_token =       "-"
 ipv4info_token =            "-"

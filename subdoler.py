@@ -25,15 +25,22 @@ fdns_file                   = config.fdns_file
 gobuster_threads            = config.gobuster_threads
 findsubdomain_token         = config.findsubdomain_token 
 ipv4info_token              = config.ipv4info_token 
-######################################################
+amass_active                = config.amass_active
+findsubdomain_active        = config.findsubdomain_active 
+ipv4info_active             = config.ipv4info_active
+dnsdumpster_active          = config.dnsdumpster_active
+fdns_active                 = config.fdns_active
+gobuster_active             = config.gobuster_active
+theharvester_active         = config.theharvester_active
+pwndb_active                = config.pwndb_active
 
 
 def get_args():
-  parser = argparse.ArgumentParser()
-  parser.add_argument('-i', '--input_file', required=True, action='store', help='Input file')
-  parser.add_argument('-o', '--output_file', default="result.csv", required=False, action='store', help='Csv file')
-  my_args = parser.parse_args()
-  return my_args
+	parser = argparse.ArgumentParser()
+	parser.add_argument('-i', '--input_file', required=True, action='store', help='Input file')
+	parser.add_argument('-o', '--output_file', default="result.csv", required=False, action='store', help='Csv file')
+	my_args = parser.parse_args()
+	return my_args
 
 
 def read_domains(domains_file):
@@ -53,22 +60,21 @@ def create_commands(domains_file):
 	for d in range(0, len(domains)):
 		domain = domains[d]
 		gobuster_cmd       += "echo; echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; echo; gobuster dns -t "+str(gobuster_threads)+" -w "+gobuster_dictionary+" -d "+domain+" -o "+gobuster_output_file+"_"+domain+"; "
-		# theharvester_cmd   += "echo; echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; echo; theharvester -d " + domain + " -b baidu,censys,crtsh,dogpile,google,linkedin,netcraft,pgp,threatcrowd,twitter,vhost,yahoo; "
-		theharvester_cmd   += "echo; echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; echo; theharvester -d " + domain + " -b google; "
+		theharvester_cmd   += "echo; echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; echo; theharvester -d " + domain + " -b google; " # -b baidu,censys,crtsh,dogpile,google,linkedin,netcraft,pgp,threatcrowd,twitter,vhost,yahoo
 		pwndb_cmd          += "echo; echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; echo; python " + pwndb_script_file + " --target @" + domain + ";"
 	gobuster_cmd     += "echo ; echo Finished" #+ "; exit"
 	theharvester_cmd += "echo ; echo Finished" #+ "; exit"
 	pwndb_cmd        += "echo ; echo Finished" #+ "; exit"
 	comandos = []
 	comandos.append({"titulo":"Borrando ficheros temporales", "comando":"touch /tmp/dummy_temp; ls /tmp/*_temp*; rm /tmp/*_temp*; exit", "active": True})
-	comandos.append({"titulo":"Amass - Passive Scan Mode", "comando": amass_cmd, "active": True})
-	comandos.append({"titulo":"Findsubdomain - Subdomains", "comando": findsubdomain_cmd, "active": True})
-	comandos.append({"titulo":"IPv4info - Subdomains", "comando": ipv4info_cmd, "active": True})
-	comandos.append({"titulo":"DNSDumpster - Subdomains", "comando": dnsdumpster_cmd, "active": True})
-	comandos.append({"titulo":"FDNS - Subdomain lister", "comando": fdns_cmd, "active": True})
-	comandos.append({"titulo":"Gobuster - Subdomain bruteforce", "comando": gobuster_cmd, "active": True})
-	comandos.append({"titulo":"TheHarvester", "comando": theharvester_cmd, "active": True})
-	comandos.append({"titulo":"Pwndb", "comando": pwndb_cmd, "active": True})
+	comandos.append({"titulo":"Amass - Passive Scan Mode", "comando": amass_cmd, "active": amass_active})
+	comandos.append({"titulo":"Findsubdomain - Subdomains", "comando": findsubdomain_cmd, "active": findsubdomain_active})
+	comandos.append({"titulo":"IPv4info - Subdomains", "comando": ipv4info_cmd, "active": ipv4info_active})
+	comandos.append({"titulo":"DNSDumpster - Subdomains", "comando": dnsdumpster_cmd, "active": dnsdumpster_active})
+	comandos.append({"titulo":"FDNS - Subdomain lister", "comando": fdns_cmd, "active": fdns_active})
+	comandos.append({"titulo":"Gobuster - Subdomain bruteforce", "comando": gobuster_cmd, "active": gobuster_active})
+	comandos.append({"titulo":"TheHarvester", "comando": theharvester_cmd, "active": theharvester_active})
+	comandos.append({"titulo":"Pwndb", "comando": pwndb_cmd, "active": pwndb_active})
 	return comandos
 
 
@@ -79,7 +85,8 @@ def exec_commands(comandos):
 
 
 def join_files():
-	os.system("cat /tmp/*_temp_* | sed -e 's/Found: //g' | sort -u > "+merged_output_file)
+	command = "cat /tmp/*_temp* | sed -e 's/Found: //g' | sort -u > "+merged_output_file
+	os.system(command)
 
 
 def generate_output(output_file):
@@ -118,7 +125,7 @@ def main():
 	output_file = args.output_file
 	comandos = create_commands(domains_file)
 	exec_commands(comandos)
-	raw_input("\nPress Enter to continue when everything is Finished...")
+	raw_input("\nPress Enter to continue when everything is finished...")
 	join_files()
 	generate_output(output_file)
 
