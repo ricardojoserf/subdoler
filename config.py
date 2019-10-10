@@ -1,6 +1,6 @@
 # Tokens
-findsubdomain_token =       ""
-ipv4info_token =            ""
+findsubdomain_token =       "-"
+ipv4info_token =            "-"
 # Temp files
 tmp_folder =                "/tmp/"
 amass_output_file =         tmp_folder + "amass_temp"

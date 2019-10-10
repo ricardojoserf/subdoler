@@ -53,19 +53,20 @@ def create_commands(domains_file):
 	for d in range(0, len(domains)):
 		domain = domains[d]
 		gobuster_cmd       += "echo; echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; echo; gobuster dns -t "+str(gobuster_threads)+" -w "+gobuster_dictionary+" -d "+domain+" -o "+gobuster_output_file+"_"+domain+"; "
-		theharvester_cmd   += "echo; echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; echo; theharvester -d " + domain + " -b baidu,censys,crtsh,dogpile,google,linkedin,netcraft,pgp,threatcrowd,twitter,vhost,yahoo; "
+		# theharvester_cmd   += "echo; echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; echo; theharvester -d " + domain + " -b baidu,censys,crtsh,dogpile,google,linkedin,netcraft,pgp,threatcrowd,twitter,vhost,yahoo; "
+		theharvester_cmd   += "echo; echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; echo; theharvester -d " + domain + " -b google; "
 		pwndb_cmd          += "echo; echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; echo; python " + pwndb_script_file + " --target @" + domain + ";"
 	gobuster_cmd     += "echo ; echo Finished" #+ "; exit"
 	theharvester_cmd += "echo ; echo Finished" #+ "; exit"
 	pwndb_cmd        += "echo ; echo Finished" #+ "; exit"
 	comandos = []
 	comandos.append({"titulo":"Borrando ficheros temporales", "comando":"touch /tmp/dummy_temp; ls /tmp/*_temp*; rm /tmp/*_temp*; exit", "active": True})
-	comandos.append({"titulo":"Amass - Passive Scan Mode", "comando": amass_cmd, "active": False})
-	comandos.append({"titulo":"Findsubdomain - Subdomains", "comando": findsubdomain_cmd, "active": False})
-	comandos.append({"titulo":"IPv4info - Subdomains", "comando": ipv4info_cmd, "active": False})
-	comandos.append({"titulo":"DNSDumpster - Subdomains", "comando": dnsdumpster_cmd, "active": False})
-	comandos.append({"titulo":"FDNS - Subdomain lister", "comando": fdns_cmd, "active": False})
-	comandos.append({"titulo":"Gobuster - Subdomain bruteforce", "comando": gobuster_cmd, "active": False})
+	comandos.append({"titulo":"Amass - Passive Scan Mode", "comando": amass_cmd, "active": True})
+	comandos.append({"titulo":"Findsubdomain - Subdomains", "comando": findsubdomain_cmd, "active": True})
+	comandos.append({"titulo":"IPv4info - Subdomains", "comando": ipv4info_cmd, "active": True})
+	comandos.append({"titulo":"DNSDumpster - Subdomains", "comando": dnsdumpster_cmd, "active": True})
+	comandos.append({"titulo":"FDNS - Subdomain lister", "comando": fdns_cmd, "active": True})
+	comandos.append({"titulo":"Gobuster - Subdomain bruteforce", "comando": gobuster_cmd, "active": True})
 	comandos.append({"titulo":"TheHarvester", "comando": theharvester_cmd, "active": True})
 	comandos.append({"titulo":"Pwndb", "comando": pwndb_cmd, "active": True})
 	return comandos

@@ -1,4 +1,4 @@
-apt install amass 
+apt install amass
 apt install gobuster
 apt install theharvester
 apt install tor
