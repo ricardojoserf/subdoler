@@ -9,8 +9,16 @@ Subdomain lister using some already created tools
 ```
 python subdoler.py -i INPUT_FILE -o OUTPUT_FILE -t TYPE
 ```
+- INPUT_FILE: Text file with a list of domains
 
-You can use these tools for subdomain enumeration, set the value *True* in the file *config.py* to activate each of them:
+- OUTPUT_FILE: CSV file with the list of subdomains, their DNS resolution and reverse resolution.
+
+- TYPE: "tmux" opens a terminal with tmux sessions and "gnome" (default value) opens many terminals
+
+
+## Options
+
+To use these tools for subdomain enumeration set their value *True* in the *config.py* file:
 
 - Amass - Only the passive scan mode
 
@@ -32,11 +40,24 @@ There are extra options for enumerating leaked information:
 - PwnDB: Search leaked credentials (tor service gets started)
 
 
-Types:
 
-- tmux: Opens a terminal with tmux sessions 
+## Screenshots
 
-- gnome (default): Opens many terminals
+First, the input file with the list of domains and the output csv files are set:
+
+![image](images/image1.jpg)
+
+Using the "-t tmux" option, a terminal with tmux sessions opens:
+
+![image](images/image2.jpg)
+
+When every tmux session has finished, press Enter and the list of subdomains appears:
+
+![image](images/image3.jpg)
+
+The final result is a CSV file which shows the list of subdomains, the DNS resolution and the reverse DNS resolution:
+
+![image](images/image4.jpg)
 
 
 
@@ -45,12 +66,3 @@ Types:
 ```
 python range_domains.py -i INPUT_FILE -o OUTPUT_FILE
 ```
-
-
-## Screenshots
-
-![image](images/image1.jpg)
-
-![image](images/image2.jpg)
-
-![image](images/image3.jpg)
