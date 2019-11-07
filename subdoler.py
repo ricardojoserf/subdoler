@@ -64,7 +64,7 @@ def create_commands(domains_file):
 		domain = domains[d]
 		gobuster_cmd       += "echo; echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; echo; gobuster dns -t "+str(gobuster_threads)+" -w "+gobuster_dictionary+" -d "+domain+" -o "+gobuster_output_file+"_"+domain+"; "
 		theharvester_cmd   += "echo; echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; echo; theharvester -d " + domain + " -b google; " # -b baidu,censys,crtsh,dogpile,google,linkedin,netcraft,pgp,threatcrowd,twitter,vhost,yahoo
-		pwndb_cmd          += "echo; echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; echo; python " + pwndb_script_file + " --target @" + domain + ";"
+		pwndb_cmd          += "echo; echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; echo; python " + pwndb_script_file + " --target @" + domain + "; "
 	gobuster_cmd     += "echo ; echo Finished" #+ "; exit"
 	theharvester_cmd += "echo ; echo Finished" #+ "; exit"
 	pwndb_cmd        += "echo ; echo Finished" #+ "; exit"
