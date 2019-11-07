@@ -3,12 +3,22 @@
 Subdomain lister using some already created tools 
 
 
+## Installation
+
+```
+git clone https://github.com/ricardojoserf/subdoler
+cd subdoler/
+cd install/
+sh install.sh
+```
+
 
 ## Usage 1: Extract subdomains from a list of domains
 
 ```
 python subdoler.py -i INPUT_FILE -o OUTPUT_FILE -t TYPE
 ```
+
 - INPUT_FILE: Text file with a list of domains
 
 - OUTPUT_FILE: CSV file with the list of subdomains, their DNS resolution and reverse resolution.
@@ -16,21 +26,21 @@ python subdoler.py -i INPUT_FILE -o OUTPUT_FILE -t TYPE
 - TYPE: "tmux" opens a terminal with tmux sessions and "gnome" (default value) opens many terminals
 
 
-## Options
+#### Options
 
 To use these tools for subdomain enumeration set their value *True* in the *config.py* file:
 
-- Amass - Only the passive scan mode
+- [Amass](https://github.com/OWASP/Amass) - Only the passive scan mode
 
-- IPv4info - Using the API. Token needed
+- [IPv4info](http://ipv4info.com/tools/api/) - Using the API. Token needed
 
-- Findsubdomain - Using the API. Token needed
+- [Findsubdomains](https://findsubdomains.com/) - Using an API. Token needed
 
-- DNSDumpster - Using the API
+- [DNSDumpster](https://github.com/PaulSec/API-dnsdumpster.com) - Using an unofficial API
 
-- Gobuster - Bruteforce mode. You can change the dictionary used
+- [Gobuster](https://github.com/OJ/gobuster) - Bruteforce mode with a cusom dictionary (using one from this [repo](https://github.com/danielmiessler/SecLists) by default)
 
-- FDNS - You must [download from here](https://opendata.rapid7.com/sonar.fdns_v2/) and reference the file in the config.py file
+- FDNS - You must [download the file from here](https://opendata.rapid7.com/sonar.fdns_v2/) and reference the file in the config.py file
 
 
 There are extra options for enumerating leaked information:
@@ -41,7 +51,7 @@ There are extra options for enumerating leaked information:
 
 
 
-## Screenshots
+#### Screenshots
 
 First, the input file with the list of domains and the output csv files are set:
 
@@ -61,8 +71,31 @@ The final result is a CSV file which shows the list of subdomains, the DNS resol
 
 
 
+----------------------------------------------------------
+
+
 ## Usage 2: Extract domains from a list of IP ranges
 
 ```
 python range_domains.py -i INPUT_FILE -o OUTPUT_FILE
 ```
+
+- INPUT_FILE: Text file with a list of IP ranges
+
+- OUTPUT_FILE: Text file with the list of domains
+
+
+
+#### Screenshots
+
+First, the IP addresses and the domains are displayed:
+
+![image](images/image10.jpg)
+
+Then, the list of "main" domains (with format *domain_name.domain_extension*) is displayed:
+
+![image](images/image11.jpg)
+
+The output file contains only the list of all the domains extracted from the IP addresses (not the "main" ones):
+
+![image](images/image12.jpg)

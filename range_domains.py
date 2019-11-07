@@ -37,7 +37,7 @@ def create_command(arr_points, length_, output_file):
 		last_ = first_ + 2**aux1 - 1
 		first_ip = str(first_) + ".0.0.0"
 		last_ip  = str(last_) + ".255.255.255"
-		print "\n[debug] Range: "+first_ip+"-"+last_ip
+		print "\nRange: "+first_ip+"-"+last_ip
 		for j in range(first_, last_):
 			for i in range(0,255):
 				for h in range(0,255):
@@ -49,7 +49,7 @@ def create_command(arr_points, length_, output_file):
 		last_ = first_ + 2**aux1 - 1
 		first_ip = arr_points[0] + "." + str(first_) + ".0.0"
 		last_ip  = arr_points[0] + "." + str(last_) + ".255.255"
-		print "\n[debug] Range: "+first_ip+"-"+last_ip
+		print "\nRange: "+first_ip+"-"+last_ip
 		for j in range(first_, last_):
 			for i in range(0,255):
 				for h in range(0,255):
@@ -60,7 +60,7 @@ def create_command(arr_points, length_, output_file):
 		last_ = first_ + 2**aux1 - 1
 		first_ip = arr_points[0] + "." + arr_points[1] + "." + str(first_) + ".0"
 		last_ip  = arr_points[0] + "." + arr_points[1] + "." + str(last_) + ".255"
-		print "\n[debug] Range: "+first_ip+"-"+last_ip
+		print "\nRange: "+first_ip+"-"+last_ip
 		for j in range(first_, last_):
 			for i in range(0,255):
 				resolve_ip(arr_points[0]+"."+arr_points[1] + "." + str(j) + "." + str(i), output_file)
@@ -70,7 +70,7 @@ def create_command(arr_points, length_, output_file):
 		last_ = first_ + 2**aux1 - 1
 		first_ip = arr_points[0] + "." + arr_points[1] + "."  + arr_points[2] + "."  + str(first_)
 		last_ip  = arr_points[0] + "." + arr_points[1] + "."  + arr_points[2] + "."  + str(last_)
-		print "\n[debug] Range: "+first_ip+"-"+last_ip
+		print "\nRange: "+first_ip+"-"+last_ip
 		for j in range(first_, last_):
 			resolve_ip(arr_points[0] + "." + arr_points[1] + "." + arr_points[2] + "." + str(j), output_file)
 	elif length_ == 32:
