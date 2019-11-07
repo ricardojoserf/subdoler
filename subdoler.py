@@ -5,6 +5,7 @@ import argparse
 import socket
 import csv
 import config
+import time
 
 
 ################ Configuration file ##################
@@ -33,12 +34,14 @@ fdns_active                 = config.fdns_active
 gobuster_active             = config.gobuster_active
 theharvester_active         = config.theharvester_active
 pwndb_active                = config.pwndb_active
+tmuxp_yaml_file 			= config.tmuxp_yaml_file
 
 
 def get_args():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-i', '--input_file', required=True, action='store', help='Input file')
 	parser.add_argument('-o', '--output_file', default="result.csv", required=False, action='store', help='Csv file')
+	parser.add_argument('-t', '--type', required=False, default="terminal", action='store', help='Type of output (gnome-terminal/tmux)')
 	my_args = parser.parse_args()
 	return my_args
 
@@ -66,7 +69,7 @@ def create_commands(domains_file):
 	theharvester_cmd += "echo ; echo Finished" #+ "; exit"
 	pwndb_cmd        += "echo ; echo Finished" #+ "; exit"
 	comandos = []
-	comandos.append({"titulo":"Borrando ficheros temporales", "comando":"touch /tmp/dummy_temp; ls /tmp/*_temp*; rm /tmp/*_temp*; exit", "active": True})
+	comandos.append({"titulo":"Borrando ficheros temporales", "comando":"touch /tmp/dummy_temp; ls /tmp/*_temp*; rm /tmp/*_temp*; echo 'Finished'", "active": True})
 	comandos.append({"titulo":"Amass - Passive Scan Mode", "comando": amass_cmd, "active": amass_active})
 	comandos.append({"titulo":"Findsubdomain - Subdomains", "comando": findsubdomain_cmd, "active": findsubdomain_active})
 	comandos.append({"titulo":"IPv4info - Subdomains", "comando": ipv4info_cmd, "active": ipv4info_active})
@@ -78,10 +81,27 @@ def create_commands(domains_file):
 	return comandos
 
 
-def exec_commands(comandos):
-	for i in comandos:
-		if i["active"]:
-			os.system('gnome-terminal -q -- bash -c "echo; echo {0}; echo; {1}; exec bash" 2>/dev/null'.format(i["titulo"],i["comando"]))
+def exec_commands(comandos, type_):
+	if type_ == "tmux":
+		#print (time.strftime("%H-%M-%S"))
+		f = open(tmuxp_yaml_file,"w")
+		f.write("session_name: subdoler\n")
+		f.write("windows:\n")
+		f.write("- window_name: dev window\n")
+		f.write("  layout: tiled\n")
+		f.write("  panes:\n")
+		for i in comandos:
+			if i["active"]:
+				f.write('    - shell_command:\n    ')
+				cmd_ = i["comando"].replace(";", "\n        -")
+				f.write('    - echo {0} \n'.format(i["titulo"]))
+				f.write('        - {0} \n'.format(cmd_))
+		tmux_cmd = "tmuxp load "+tmuxp_yaml_file
+		os.system('gnome-terminal -q -- bash -c "echo; {0}; exec bash" 2>/dev/null'.format(tmux_cmd))
+	else:
+		for i in comandos:
+			if i["active"]:
+				os.system('gnome-terminal -q -- bash -c "echo; echo {0}; echo; {1}; exec bash" 2>/dev/null'.format(i["titulo"],i["comando"]))
 
 
 def join_files():
@@ -123,9 +143,22 @@ def main():
 	args = get_args()
 	domains_file = args.input_file
 	output_file = args.output_file
+	type_ = args.type
 	comandos = create_commands(domains_file)
-	exec_commands(comandos)
-	raw_input("\nPress Enter to continue when everything is finished...")
+	exec_commands(comandos, type_)
+	print ""
+	print " .d8888b.           888           888          888"
+	print "d88P  Y88b          888           888          888                  "
+	print "Y88b.               888           888          888                  "
+	print " *Y888b.   888  888 88888b.   .d88888  .d88b.  888  .d88b.  888d888 "
+	print "    *Y88b. 888  888 888 *88b d88* 888 d88**88b 888 d8P  Y8b 888P"
+	print "      *888 888  888 888  888 888  888 888  888 888 88888888 888     "
+	print "Y88b  d88P Y88b 888 888 d88P Y88b 888 Y88..88P 888 Y8b.     888     "
+	print " *Y8888P*   *Y88888 88888P*   *Y88888  *Y88P*  888  *Y8888  888"
+	print ""
+	print "      -  A (hopefully) less painful way to list subdomains -      "
+	print ""
+	raw_input("\nPress Enter to continue when every terminal has 'Finished'...")
 	join_files()
 	generate_output(output_file)
 
