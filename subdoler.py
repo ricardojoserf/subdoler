@@ -51,10 +51,10 @@ def read_domains(domains_file):
 
 
 def create_commands(domains_file):
-	amass_cmd =         "amass enum --passive -d "+",".join(read_domains(domains_file))+" -o "+amass_output_file + "; echo "+"; echo Finished" #+ "; exit"
-	findsubdomain_cmd = "python "+findsubdomain_script_file+" -f "+domains_file+" -a "+findsubdomain_token+" -o "+findsubdomain_output_file + "; echo "+"; echo Finished" #+ "; exit"
-	ipv4info_cmd =      "python "+ipv4info_script_file+" -f "+domains_file+" -a "+ipv4info_token+" -o "+ipv4info_output_file + "; echo "+"; echo Finished" #+ "; exit"
-	dnsdumpster_cmd =   "python "+dnsdumpster_script_file+" -f "+domains_file+" -o "+dnsdumpster_output_file + "; echo "+"; echo Finished" #+ "; exit"
+	amass_cmd =         "amass enum --passive -d "+",".join(read_domains(domains_file))+" -o "+amass_output_file + "; echo Finished" #+ "; exit"
+	findsubdomain_cmd = "python "+findsubdomain_script_file+" -f "+domains_file+" -a "+findsubdomain_token+" -o "+findsubdomain_output_file + "; echo Finished" #+ "; exit"
+	ipv4info_cmd =      "python "+ipv4info_script_file+" -f "+domains_file+" -a "+ipv4info_token+" -o "+ipv4info_output_file +"; echo Finished" #+ "; exit"
+	dnsdumpster_cmd =   "python "+dnsdumpster_script_file+" -f "+domains_file+" -o "+dnsdumpster_output_file +"; echo Finished" #+ "; exit"
 	fdns_cmd =          "zcat "+fdns_file+" | egrep '(" + "|".join(read_domains(domains_file)) + ")' | tee "+fdns_output_file #+ "; exit"
 	gobuster_cmd =      ""
 	theharvester_cmd =  ""
@@ -63,11 +63,11 @@ def create_commands(domains_file):
 	for d in range(0, len(domains)):
 		domain = domains[d]
 		gobuster_cmd       += "echo; echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; echo; gobuster dns -t "+str(gobuster_threads)+" -w "+gobuster_dictionary+" -d "+domain+" -o "+gobuster_output_file+"_"+domain+"; "
-		theharvester_cmd   += "echo; echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; echo; theharvester -d " + domain + " -b google; " # -b baidu,censys,crtsh,dogpile,google,linkedin,netcraft,pgp,threatcrowd,twitter,vhost,yahoo
+		theharvester_cmd   += "echo; echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; echo; theHarvester -d " + domain + " -b google; " # -b baidu,censys,crtsh,dogpile,google,linkedin,netcraft,pgp,threatcrowd,twitter,vhost,yahoo
 		pwndb_cmd          += "echo; echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; echo; python " + pwndb_script_file + " --target @" + domain + "; "
-	gobuster_cmd     += "echo ; echo Finished" #+ "; exit"
-	theharvester_cmd += "echo ; echo Finished" #+ "; exit"
-	pwndb_cmd        += "echo ; echo Finished" #+ "; exit"
+	gobuster_cmd     += "echo Finished" #+ "; exit"
+	theharvester_cmd += "echo Finished" #+ "; exit"
+	pwndb_cmd        += "echo Finished" #+ "; exit"
 	comandos = []
 	comandos.append({"titulo":"Borrando ficheros temporales", "comando":"touch /tmp/dummy_temp; ls /tmp/*_temp*; rm /tmp/*_temp*; echo 'Finished'", "active": True})
 	comandos.append({"titulo":"Amass - Passive Scan Mode", "comando": amass_cmd, "active": amass_active})
@@ -84,6 +84,7 @@ def create_commands(domains_file):
 def exec_commands(comandos, type_):
 	if type_ == "tmux":
 		#print (time.strftime("%H-%M-%S"))
+		os.system("tmux kill-session -t subdoler 2>/dev/null")
 		f = open(tmuxp_yaml_file,"w")
 		f.write("session_name: subdoler\n")
 		f.write("windows:\n")

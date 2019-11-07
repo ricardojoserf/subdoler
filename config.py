@@ -1,14 +1,16 @@
 # Options 
 #amass_active                = False
 amass_active                = True
-#findsubdomain_active        = False
-findsubdomain_active        = True
-#ipv4info_active             = False
-ipv4info_active             = True
-#dnsdumpster_active          = False
-dnsdumpster_active          = True
-#fdns_active                 = False
-fdns_active                 = True
+findsubdomain_active        = False
+#findsubdomain_active        = True
+findsubdomain_token =       "-"
+ipv4info_active             = False
+#ipv4info_active             = True
+ipv4info_token =            "-"
+dnsdumpster_active          = False
+#dnsdumpster_active          = True
+fdns_active                 = False
+#fdns_active                 = True
 #gobuster_active             = False
 gobuster_active             = True
 #theharvester_active         = False
@@ -16,8 +18,6 @@ theharvester_active         = True
 #pwndb_active                = False
 pwndb_active                = True
 # Tokens
-findsubdomain_token =       "-"
-ipv4info_token =            "-"
 # Temp files
 tmp_folder =                "/tmp/"
 amass_output_file =         tmp_folder + "amass_temp"
@@ -38,6 +38,6 @@ pwndb_script_file =         apis_folder_path + "pwndb/pwndb.py"
 gobuster_dictionary =       apis_folder_path + "bitquark-subdomains-top100000.txt"
 gobuster_threads =          10
 # FDNS
-fdns_file =                 "fdns.json.gz"
+fdns_file =                 "/root/fdns.json.gz"
 #tmux
 tmuxp_yaml_file = 			tmp_folder + "subolder_temp.yaml"
