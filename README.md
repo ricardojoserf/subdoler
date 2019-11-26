@@ -99,3 +99,13 @@ When every tmux session has finished, press Enter and the list of subdomains app
 The final result is a CSV file which shows the list of subdomains, the DNS resolution and the reverse DNS resolution:
 
 ![image](images/image4.jpg)
+
+
+
+## TODOS
+
+- Extract ranges from name
+
+- Concurency
+
+- Analysis with Shodan
