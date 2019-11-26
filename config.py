@@ -1,16 +1,16 @@
 import os
 
 # Options 
-amass_active                = True
-findsubdomain_active        = True
+amass_active                = False
+findsubdomain_active        = False
 findsubdomain_token =       "-"
-ipv4info_active             = True
+ipv4info_active             = False
 ipv4info_token =            "-"
-dnsdumpster_active          = True
+dnsdumpster_active          = False
 fdns_active                 = True
 gobuster_active             = True
-theharvester_active         = True
-pwndb_active                = True
+theharvester_active         = False
+pwndb_active                = False
 
 # Temp files
 tmp_folder =                "/tmp/"
@@ -32,8 +32,8 @@ dnsdumpster_script_file =   apis_folder_path + "API-dnsdumpster.com/api.py"
 pwndb_script_file =         apis_folder_path + "pwndb/pwndb.py"
 # Gobuster
 gobuster_dictionary =       apis_folder_path + "bitquark-subdomains-top100000.txt"
-gobuster_threads =          10
+gobuster_threads =          30
 # FDNS
-fdns_file =                 "/root/fdns.json.gz"
+fdns_file =                 "/media/root/Seagate Expansion Drive/fdns.json.gz"
 #tmux
 tmuxp_yaml_file = 	    tmp_folder + "subolder_temp.yaml"

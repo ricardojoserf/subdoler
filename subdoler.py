@@ -34,7 +34,7 @@ fdns_active                 = config.fdns_active
 gobuster_active             = config.gobuster_active
 theharvester_active         = config.theharvester_active
 pwndb_active                = config.pwndb_active
-tmuxp_yaml_file 			= config.tmuxp_yaml_file
+tmuxp_yaml_file 	    = config.tmuxp_yaml_file
 
 
 def get_args():
@@ -55,7 +55,7 @@ def create_commands(domains_file):
 	findsubdomain_cmd = "python "+findsubdomain_script_file+" -f "+domains_file+" -a "+findsubdomain_token+" -o "+findsubdomain_output_file + "; echo Finished" #+ "; exit"
 	ipv4info_cmd =      "python "+ipv4info_script_file+" -f "+domains_file+" -a "+ipv4info_token+" -o "+ipv4info_output_file +"; echo Finished" #+ "; exit"
 	dnsdumpster_cmd =   "python "+dnsdumpster_script_file+" -f "+domains_file+" -o "+dnsdumpster_output_file +"; echo Finished" #+ "; exit"
-	fdns_cmd =          "zcat "+fdns_file+" | egrep '(" + "|".join(read_domains(domains_file)) + ")' | tee "+fdns_output_file #+ "; exit"
+	fdns_cmd =          "zcat '"+fdns_file+"' | egrep '(" + "|\\.".join(read_domains(domains_file)) + ")' | cut -d ',' -f 2 | cut -d '\"' -f 4 | tee "+fdns_output_file  #+ "; exit"
 	gobuster_cmd =      ""
 	theharvester_cmd =  ""
 	pwndb_cmd =         "service tor start; "
