@@ -6,6 +6,7 @@ import socket
 import csv
 import config
 import time
+import csv
 
 
 ################ Configuration file ##################
@@ -105,40 +106,35 @@ def exec_commands(comandos, type_):
 				os.system('gnome-terminal -q -- bash -c "echo; echo {0}; echo; {1}; exec bash" 2>/dev/null'.format(i["titulo"],i["comando"]))
 
 
-def join_files():
-	command = "cat /tmp/*_temp* | sed -e 's/Found: //g' | sort -u > "+merged_output_file
-	os.system(command)
-
-
-def generate_output(output_file):
-	csv_arr = []
-	subdoms = open(merged_output_file).read().splitlines()
-	dom_arr = []
-	print "\nNumber of subdomains: ", len(subdoms)
-	print "------------------------"
-	print "------ Subdomains ------"
-	print "------------------------"
-	for i in subdoms:
-		print i
-		try:
-			ip_dominio =  subprocess.Popen(["dig", "+short", i], stdout=subprocess.PIPE).communicate()[0].replace("\n"," ")
-		except:
-			ip_dominio = ""
-		if ip_dominio is not "":
-			try:
-				reverse_dns = subprocess.Popen(["dig", "+short", ip_dominio.split(" ")[0]], stdout=subprocess.PIPE).communicate()[0].replace("\n"," ")
-			except:
-				reverse_dns = ""
-		else:
-			reverse_dns = ""
-		csv_line = [i,ip_dominio,reverse_dns]
-		csv_arr.append(csv_line)
-	print "------------------------"
-	with open(output_file, 'wb') as myfile:
-		wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
-		for row in csv_arr:
-			wr.writerow(row)
-
+def join_files(output_file):
+	#command = "cat /tmp/*_temp* | sed -e 's/Found: //g' | sort -u > "+merged_output_file
+	#os.system(command)
+	
+	res_files = [{'name': amass_output_file,'code':'Amass'},{'name': ipv4info_output_file,'code':'IPv4info API'},{'name': findsubdomain_output_file,'code':'Findsubdomain API'},{'name': dnsdumpster_output_file,'code':'DNSDumpster API'},{'name': gobuster_output_file,'code':'Gobuster'},{'name': fdns_output_file,'code':'FDNS'}]
+	
+	unique_subdomains = []
+	with open(output_file,"w+") as csv_file:
+		writer = csv.writer(csv_file)
+		writer.writerow(["Subdomain", "Source", "IP", "Reversed IP"])
+		for f in res_files:
+			if os.path.isfile(f['name']):
+				file_values = open(f['name']).read().splitlines()
+				for v in file_values:
+					print "v", v
+					if f['code'] == 'Gobuster':
+						v = v.split(" ")[2]
+					if v not in unique_subdomains:
+							unique_subdomains.append(f)
+					try:
+						calculated_ip =  subprocess.Popen(["dig", "+short", v], stdout=subprocess.PIPE).communicate()[0].replace("\n"," ")
+					except:
+						calculated_ip = ""
+					try:
+						reverse_dns = subprocess.Popen(["dig", "+short", calculated_ip.split(" ")[0]], stdout=subprocess.PIPE).communicate()[0].replace("\n"," ")
+					except:
+						reverse_dns = ""
+					writer.writerow([v, f['code'], calculated_ip, reverse_dns])
+					
 
 def main():
 	args = get_args()
@@ -160,8 +156,8 @@ def main():
 	print "      -  A (hopefully) less painful way to list subdomains -      "
 	print ""
 	raw_input("\nPress Enter to continue when every terminal has 'Finished'...")
-	join_files()
-	generate_output(output_file)
+	join_files(output_file)
+	#generate_output(output_file)
 
 
 if __name__== "__main__":

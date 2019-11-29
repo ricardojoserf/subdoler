@@ -106,13 +106,9 @@ def main():
 	if ranges_file is None and company_name is None:
 		print "Ranges file or company name are necessary"
 		sys.exit(1)
-	'''if ranges_file is not None and company_name is not None:
-		print "Only ranges file or company name can be processed once"
-		sys.exit(1)'''
 	output_file = args.output_file
 	ranges = []
 	if ranges_file is not None:
-		#ranges.append(read_lines(ranges_file))
 		ranges = read_lines(ranges_file)
 	if company_name is not None:
 		ranges_info = utils.get_ranges(company_name)
