@@ -1,16 +1,16 @@
 import os
 
 # Options 
-amass_active                = False
-findsubdomain_active        = False
+amass_active                = True
+findsubdomain_active        = True
 findsubdomain_token =       "-"
-ipv4info_active             = False
+ipv4info_active             = True
 ipv4info_token =            "-"
-dnsdumpster_active          = False
+dnsdumpster_active          = True
 fdns_active                 = True
-gobuster_active             = True
-theharvester_active         = False
-pwndb_active                = False
+gobuster_active             =  True
+theharvester_active         = True
+pwndb_active                = True
 
 # Temp files
 tmp_folder =                "/tmp/"
