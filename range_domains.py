@@ -1,11 +1,12 @@
 import sys
 import os
 import argparse
-
+import utils
 
 def get_args():
   parser = argparse.ArgumentParser()
-  parser.add_argument('-i', '--input_file', required=True, action='store', help='Input file')
+  parser.add_argument('-f', '--ranges_file', required=False, action='store', help='File with ranges to analyze')
+  parser.add_argument('-c', '--company_name', required=False, action='store', help='Company name')
   parser.add_argument('-o', '--output_file', default="results", required=False, action='store', help='Output file')
   my_args = parser.parse_args()
   return my_args
@@ -100,9 +101,24 @@ def extract_domains(output_file):
 
 def main():
 	args= get_args()
-	input_file = args.input_file
+	ranges_file = args.ranges_file
+	company_name = args.company_name
+	if ranges_file is None and company_name is None:
+		print "Ranges file or company name are necessary"
+		sys.exit(1)
+	'''if ranges_file is not None and company_name is not None:
+		print "Only ranges file or company name can be processed once"
+		sys.exit(1)'''
 	output_file = args.output_file
-	ranges = read_lines(input_file)
+	ranges = []
+	if ranges_file is not None:
+		#ranges.append(read_lines(ranges_file))
+		ranges = read_lines(ranges_file)
+	if company_name is not None:
+		ranges_info = utils.get_ranges(company_name)
+		for r in ranges_info:
+			print "Range: %s Name: %s "%(r['range'], r['name'])
+			ranges.append(r['range'])
 	for r in ranges:
 		length_ = int(r.split("/")[1])
 		arr_points = r.split("/")[0].split(".")
