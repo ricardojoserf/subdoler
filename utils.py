@@ -38,7 +38,7 @@ def get_ranges(company_name):
 						range_val = first_ip+"/"+str(j['range'])
 						ranges.append({'name':vals[8].getText(), 'range': range_val})
 						break		
-	return ranges
+	#return ranges
 
 
 #################################################################3
@@ -92,7 +92,7 @@ def order_subdomains(output_file):
 		for i in aux_arr:
 			if i['dom'] == p:
 				print "-", i['subdom']
-
+	return f
 
 #################################################################3
 

@@ -64,15 +64,7 @@ def create_command(arr_points, length_, output_file):
 		sys.exit(1)
 
 
-def main():
-	args= get_args()
-	ranges_file = args.ranges_file
-	companies_file = args.companies_file
-	if ranges_file is None and companies_file is None:
-		print "Error: Ranges file or company name are necessary"
-		print "usage: range_domains.py [-h] [-r RANGES_FILE] [-c COMPANIES_FILE] [-o OUTPUT_FILE]"
-		sys.exit(1)
-	output_file = args.output_file
+def range_extractor(ranges_file, companies_file, output_file):
 	ranges = []
 	if ranges_file is not None:
 		ranges = open(ranges_file).read().splitlines()
@@ -91,7 +83,23 @@ def main():
 		length_ = int(r.split("/")[1])
 		arr_points = r.split("/")[0].split(".")
 		create_command(arr_points, length_, output_file)
-	utils.order_subdomains(output_file)
+	#all_domains = utils.order_subdomains(output_file)
+	return output_file
+
+
+
+
+def main():
+	args= get_args()
+	ranges_file = args.ranges_file
+	companies_file = args.companies_file
+	if ranges_file is None and companies_file is None:
+		print "Error: Ranges or company file is necessary"
+		print "usage: range_domains.py [-h] [-r RANGES_FILE] [-c COMPANIES_FILE] [-o OUTPUT_FILE]"
+		sys.exit(1)
+	output_file = args.output_file
+	range_extractor(ranges_file, companies_file, output_file)
+	
 
 
 if __name__== "__main__":

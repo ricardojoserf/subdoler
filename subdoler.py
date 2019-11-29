@@ -7,41 +7,13 @@ import csv
 from config import *
 import time
 import csv
-
-
-'''
-################ Configuration file ##################
-tmp_folder                  = config.tmp_folder
-amass_output_file           = config.amass_output_file
-ipv4info_output_file        = config.ipv4info_output_file
-findsubdomain_output_file   = config.findsubdomain_output_file
-dnsdumpster_output_file     = config.dnsdumpster_output_file
-gobuster_output_file        = config.gobuster_output_file
-fdns_output_file            = config.fdns_output_file
-merged_output_file          = config.merged_output_file
-ipv4info_script_file        = config.ipv4info_script_file
-findsubdomain_script_file   = config.findsubdomain_script_file
-dnsdumpster_script_file     = config.dnsdumpster_script_file
-pwndb_script_file           = config.pwndb_script_file
-gobuster_dictionary         = config.gobuster_dictionary
-fdns_file                   = config.fdns_file
-gobuster_threads            = config.gobuster_threads
-findsubdomain_token         = config.findsubdomain_token 
-ipv4info_token              = config.ipv4info_token 
-amass_active                = config.amass_active
-findsubdomain_active        = config.findsubdomain_active 
-ipv4info_active             = config.ipv4info_active
-dnsdumpster_active          = config.dnsdumpster_active
-fdns_active                 = config.fdns_active
-gobuster_active             = config.gobuster_active
-theharvester_active         = config.theharvester_active
-pwndb_active                = config.pwndb_active
-tmuxp_yaml_file 	    = config.tmuxp_yaml_file
-'''
+import range_domains
 
 def get_args():
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-i', '--input_file', required=True, action='store', help='Input file')
+	parser.add_argument('-d', '--domains_file', required=False, action='store', help='File with domains to analyze')
+	parser.add_argument('-r', '--ranges_file', required=False, action='store', help='File with ranges to analyze')
+	parser.add_argument('-c', '--companies_file', required=False, action='store', help='File with ranges to analyze')
 	parser.add_argument('-o', '--output_file', default="result.csv", required=False, action='store', help='Csv file')
 	parser.add_argument('-t', '--type', required=False, default="terminal", action='store', help='Type of output (gnome-terminal/tmux)')
 	my_args = parser.parse_args()
@@ -135,9 +107,19 @@ def join_files(output_file):
 
 def main():
 	args = get_args()
-	domains_file = args.input_file
+	domains_file = args.domains_file
 	output_file = args.output_file
 	type_ = args.type
+	ranges_file = args.ranges_file
+	companies_file = args.companies_file
+	if domains_file is None and ranges_file is None and companies_file is None:
+		print "Error: Domains, ranges or company file is necessary"
+	
+	if domains_file is None:
+		temp_domains_file = "/tmp/domains"
+		domains_file = range_domains.range_extractor(ranges_file, companies_file, temp_domains_file)
+
+
 	comandos = create_commands(domains_file)
 	exec_commands(comandos, type_)
 	print ""
