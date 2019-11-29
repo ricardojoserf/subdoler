@@ -108,4 +108,8 @@ The final result is a CSV file which shows the list of subdomains, the DNS resol
 
 - Concurency
 
+- Add the source of finding the subdomain -> Uniq after that with all
+
+- Check if detected IP in the ranges
+
 - Analysis with Shodan
