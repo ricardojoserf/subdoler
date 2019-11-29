@@ -4,11 +4,12 @@ import subprocess
 import argparse
 import socket
 import csv
-import config
+from config import *
 import time
 import csv
 
 
+'''
 ################ Configuration file ##################
 tmp_folder                  = config.tmp_folder
 amass_output_file           = config.amass_output_file
@@ -36,7 +37,7 @@ gobuster_active             = config.gobuster_active
 theharvester_active         = config.theharvester_active
 pwndb_active                = config.pwndb_active
 tmuxp_yaml_file 	    = config.tmuxp_yaml_file
-
+'''
 
 def get_args():
 	parser = argparse.ArgumentParser()
@@ -84,7 +85,6 @@ def create_commands(domains_file):
 
 def exec_commands(comandos, type_):
 	if type_ == "tmux":
-		#print (time.strftime("%H-%M-%S"))
 		os.system("tmux kill-session -t subdoler 2>/dev/null")
 		f = open(tmuxp_yaml_file,"w")
 		f.write("session_name: subdoler\n")
@@ -107,34 +107,31 @@ def exec_commands(comandos, type_):
 
 
 def join_files(output_file):
-	#command = "cat /tmp/*_temp* | sed -e 's/Found: //g' | sort -u > "+merged_output_file
-	#os.system(command)
-	
-	res_files = [{'name': amass_output_file,'code':'Amass'},{'name': ipv4info_output_file,'code':'IPv4info API'},{'name': findsubdomain_output_file,'code':'Findsubdomain API'},{'name': dnsdumpster_output_file,'code':'DNSDumpster API'},{'name': gobuster_output_file,'code':'Gobuster'},{'name': fdns_output_file,'code':'FDNS'}]
-	
 	unique_subdomains = []
+	res_files = [{'name': amass_output_file,'code':'Amass'},{'name': ipv4info_output_file,'code':'IPv4info API'},{'name': findsubdomain_output_file,'code':'Findsubdomain API'},{'name': dnsdumpster_output_file,'code':'DNSDumpster API'},{'name': gobuster_output_file,'code':'Gobuster'},{'name': fdns_output_file,'code':'FDNS'}]
+
 	with open(output_file,"w+") as csv_file:
 		writer = csv.writer(csv_file)
 		writer.writerow(["Subdomain", "Source", "IP", "Reversed IP"])
 		for f in res_files:
-			if os.path.isfile(f['name']):
-				file_values = open(f['name']).read().splitlines()
+			f_name = f['name']
+			if os.path.isfile(f_name):
+				print "Calculating data from",f_name
+				file_values = open(f_name).read().splitlines()
 				for v in file_values:
-					print "v", v
-					if f['code'] == 'Gobuster':
-						v = v.split(" ")[2]
-					if v not in unique_subdomains:
-							unique_subdomains.append(f)
-					try:
+					if len(v) > 2:
+						if f_name == 'Gobuster':
+							v = v.split(" ")[2]
+						if v not in unique_subdomains:
+							unique_subdomains.append(v)
 						calculated_ip =  subprocess.Popen(["dig", "+short", v], stdout=subprocess.PIPE).communicate()[0].replace("\n"," ")
-					except:
-						calculated_ip = ""
-					try:
-						reverse_dns = subprocess.Popen(["dig", "+short", calculated_ip.split(" ")[0]], stdout=subprocess.PIPE).communicate()[0].replace("\n"," ")
-					except:
-						reverse_dns = ""
-					writer.writerow([v, f['code'], calculated_ip, reverse_dns])
-					
+						reverse_dns = subprocess.Popen(["dig", "+short", calculated_ip.split(" ")[0]], stdout=subprocess.PIPE).communicate()[0].replace("\n"," ") if calculated_ip != "" else ""
+						writer.writerow([v, f['code'], calculated_ip, reverse_dns])
+	
+	print "\n"+"-"*25+"\n"+"Unique subdomains: "+str(len(unique_subdomains))+"\n"+"-"*25
+	for u in unique_subdomains:
+		print "-",u
+
 
 def main():
 	args = get_args()
@@ -155,9 +152,8 @@ def main():
 	print ""
 	print "      -  A (hopefully) less painful way to list subdomains -      "
 	print ""
-	raw_input("\nPress Enter to continue when every terminal has 'Finished'...")
+	raw_input("\nPress Enter to continue when every terminal has 'Finished'...\n")
 	join_files(output_file)
-	#generate_output(output_file)
 
 
 if __name__== "__main__":

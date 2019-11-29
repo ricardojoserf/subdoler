@@ -39,8 +39,8 @@ def get_ranges(company_name):
 						range_val = first_ip+"/"+str(j['range'])
 						ranges.append({'name':vals[8].getText(), 'range': range_val})
 						break
-	for r in ranges:
-		print r			
+	#for r in ranges:
+	#	print r			
 	return ranges
 
 #################################################################3
