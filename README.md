@@ -104,7 +104,7 @@ The final result is a CSV file which shows the list of subdomains, the DNS resol
 
 ## TODOS
 
-- Extract ranges from name
+- Extract ranges from name - done, to be implemented
 
 - Concurency
 
