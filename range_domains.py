@@ -3,123 +3,95 @@ import os
 import argparse
 import utils
 
+
 def get_args():
   parser = argparse.ArgumentParser()
-  parser.add_argument('-f', '--ranges_file', required=False, action='store', help='File with ranges to analyze')
-  parser.add_argument('-c', '--company_name', required=False, action='store', help='Company name')
+  parser.add_argument('-r', '--ranges_file', required=False, action='store', help='File with ranges to analyze')
+  parser.add_argument('-c', '--companies_file', required=False, action='store', help='File with ranges to analyze')
   parser.add_argument('-o', '--output_file', default="results", required=False, action='store', help='Output file')
   my_args = parser.parse_args()
   return my_args
-
-
-def read_lines(domains_file):
-	return open(domains_file).read().splitlines()
-
-
-def get_base(val, index):
-	base = 0
-	for i in range(0, index):
-		if (val - 2**(7-i)) >= 0:
-			base += 2**(7-i)
-			val -= 2**(7-i)
-	return base
-
-
-def resolve_ip(ip_addr, output_file):
-	comando = "a=$(nslookup " + ip_addr +" | grep name | awk '{print $4}'); if [ ${#a} -ge 1 ]; then echo "+ ip_addr +" - $a | sed -e 's/.$//'; echo $a | tr ' ' '\n' | sed -e 's/.$//' >> "+output_file+"; fi;"
-	os.system(comando)	
 
 
 def create_command(arr_points, length_, output_file):
 	final_cmd = ""
 	if length_ < 8:
 		aux1 = 8 - length_
-		first_ = get_base(int(arr_points[0]), int(8 - aux1))
+		first_ = utils.get_base(int(arr_points[0]), int(8 - aux1))
 		last_ = first_ + 2**aux1 - 1
 		first_ip = str(first_) + ".0.0.0"
 		last_ip  = str(last_) + ".255.255.255"
-		print "\nRange: "+first_ip+"-"+last_ip
+		print "\nRange: "+first_ip+"-"+last_ip+"\n"
 		for j in range(first_, last_):
 			for i in range(0,255):
 				for h in range(0,255):
 					for g in range(0,255):
-						resolve_ip(str(j) + "." + str(i) + "." + str(h) + "." + str(g), output_file)
+						utils.resolve_ip(str(j) + "." + str(i) + "." + str(h) + "." + str(g), output_file)
 	elif length_ < 16:
 		aux1 = 16 - length_
-		first_ = get_base(int(arr_points[1]), int(8 - aux1))
+		first_ = utils.get_base(int(arr_points[1]), int(8 - aux1))
 		last_ = first_ + 2**aux1 - 1
 		first_ip = arr_points[0] + "." + str(first_) + ".0.0"
 		last_ip  = arr_points[0] + "." + str(last_) + ".255.255"
-		print "\nRange: "+first_ip+"-"+last_ip
+		print "\nRange: "+first_ip+"-"+last_ip+"\n"
 		for j in range(first_, last_):
 			for i in range(0,255):
 				for h in range(0,255):
-					resolve_ip(arr_points[0]+"."+ str(j) + "." + str(i) + "." + str(h), output_file)
+					utils.resolve_ip(arr_points[0]+"."+ str(j) + "." + str(i) + "." + str(h), output_file)
 	elif length_ < 24:
 		aux1 = 24 - length_
-		first_ = get_base(int(arr_points[2]), int(8 - aux1))
+		first_ = utils.get_base(int(arr_points[2]), int(8 - aux1))
 		last_ = first_ + 2**aux1 - 1
 		first_ip = arr_points[0] + "." + arr_points[1] + "." + str(first_) + ".0"
 		last_ip  = arr_points[0] + "." + arr_points[1] + "." + str(last_) + ".255"
-		print "\nRange: "+first_ip+"-"+last_ip
+		print "\nRange: \t"+first_ip+"-"+last_ip+"\n"
 		for j in range(first_, last_):
 			for i in range(0,255):
-				resolve_ip(arr_points[0]+"."+arr_points[1] + "." + str(j) + "." + str(i), output_file)
+				utils.resolve_ip(arr_points[0]+"."+arr_points[1] + "." + str(j) + "." + str(i), output_file)
 	elif length_ < 32:
 		aux1 = 32 - length_
-		first_ = get_base(int(arr_points[3]), int(8 - aux1))
+		first_ = utils.get_base(int(arr_points[3]), int(8 - aux1))
 		last_ = first_ + 2**aux1 - 1
 		first_ip = arr_points[0] + "." + arr_points[1] + "."  + arr_points[2] + "."  + str(first_)
 		last_ip  = arr_points[0] + "." + arr_points[1] + "."  + arr_points[2] + "."  + str(last_)
-		print "\nRange: "+first_ip+"-"+last_ip
+		print "\n\nRange: "+first_ip+"-"+last_ip+"\n"
 		for j in range(first_, last_):
-			resolve_ip(arr_points[0] + "." + arr_points[1] + "." + arr_points[2] + "." + str(j), output_file)
+			utils.resolve_ip(arr_points[0] + "." + arr_points[1] + "." + arr_points[2] + "." + str(j), output_file)
 	elif length_ == 32:
-		resolve_ip(arr_points[0] + "." + arr_points[1] + "." + arr_points[2] + "." + arr_points[3], output_file)
+		utils.resolve_ip(arr_points[0] + "." + arr_points[1] + "." + arr_points[2] + "." + arr_points[3], output_file)
 	else:
 		print "Wrong IP format"
 		sys.exit(1)
 
 
-def extract_domains(output_file):
-	subdoms = open(output_file).read().splitlines()
-	dom_arr = []
-	for i in subdoms:
-		if " " in i:
-			i = i.split(" ")[2]	
-		dominio = i.split(".")[len(i.split("."))-2]+"."+i.split(".")[len(i.split("."))-1]
-		if dominio not in dom_arr:
-			dom_arr.append(dominio)
-	print "\nNumber of main domains: ", len(dom_arr)
-	print "------------------------"
-	print "----- Main Domains -----"
-	print "------------------------"
-	for d in dom_arr:
-		print d
-	print "------------------------"
-
-
 def main():
 	args= get_args()
 	ranges_file = args.ranges_file
-	company_name = args.company_name
-	if ranges_file is None and company_name is None:
-		print "Ranges file or company name are necessary"
+	companies_file = args.companies_file
+	if ranges_file is None and companies_file is None:
+		print "Error: Ranges file or company name are necessary"
+		print "usage: range_domains.py [-h] [-r RANGES_FILE] [-c COMPANIES_FILE] [-o OUTPUT_FILE]"
 		sys.exit(1)
 	output_file = args.output_file
 	ranges = []
 	if ranges_file is not None:
-		ranges = read_lines(ranges_file)
-	if company_name is not None:
-		ranges_info = utils.get_ranges(company_name)
-		for r in ranges_info:
-			print "Range: %s Name: %s "%(r['range'], r['name'])
-			ranges.append(r['range'])
+		ranges = open(ranges_file).read().splitlines()
+	if companies_file is not None:
+		companies = open(companies_file).read().splitlines()
+		for c in companies:
+			ranges_info = utils.get_ranges(c)
+			print "\nCompany: "+c+"\n"
+			print ranges_info
+			for r in ranges_info:
+				print "- Range: %s   \tName: %s "%(r['range'], r['name'])
+				ranges.append(r['range'])
+			if len(ranges_info) == 0:
+				print " - No data found"
 	for r in ranges:
 		length_ = int(r.split("/")[1])
 		arr_points = r.split("/")[0].split(".")
 		create_command(arr_points, length_, output_file)
-	extract_domains(output_file)
+	utils.order_subdomains(output_file)
 
 
 if __name__== "__main__":

@@ -6,7 +6,6 @@ import requests
 from bs4 import BeautifulSoup
 
 
-
 #################################################################3
 
 ipv4_base_url =   "http://ipv4info.com"
@@ -38,12 +37,65 @@ def get_ranges(company_name):
 					if (int(range_size)-int(j['val'])) <=0:
 						range_val = first_ip+"/"+str(j['range'])
 						ranges.append({'name':vals[8].getText(), 'range': range_val})
-						break
-	#for r in ranges:
-	#	print r			
+						break		
 	return ranges
 
+
 #################################################################3
+
+
+def get_base(val, index):
+	base = 0
+	for i in range(0, index):
+		if (val - 2**(7-i)) >= 0:
+			base += 2**(7-i)
+			val -= 2**(7-i)
+	return base
+
+
+def resolve_ip(ip_addr, output_file):
+	comando = "a=$(nslookup " + ip_addr +" | grep name | awk '{print $4}'); if [ ${#a} -ge 1 ]; then echo "+ ip_addr +" - $a | sed -e 's/.$//'; echo $a | tr ' ' '\n' | sed -e 's/.$//' >> "+output_file+"; fi;"
+	os.system(comando)	
+
+
+#################################################################3
+
+
+def order_subdomains(output_file):
+	f = open(output_file).read().splitlines()
+	common_extensions = ["com","co","es","net","org","us"]
+	possible_domains = []
+
+	print "\n"+"-"*25+"\n"+"Domains list"+"\n"+"-"*25
+	for i in f:
+		if len(i)>2:
+			splitted = i.split(".")
+			if splitted[len(splitted)-2] not in common_extensions:
+				pd = splitted[len(splitted)-2]+"."+splitted[len(splitted)-1]
+				if pd not in possible_domains:
+					print "-", pd
+					possible_domains.append(pd)
+			else:
+				pd = splitted[len(splitted)-3]+"."+splitted[len(splitted)-2]+"."+splitted[len(splitted)-1]
+				if pd not in possible_domains:
+					print "-", pd
+					possible_domains.append(pd)
+
+	print "\n"+"-"*25+"\n"+"Subdomains list"+"\n"+"-"*25
+	aux_arr = []
+	for i in f:
+		for p in possible_domains:
+			if p in i:
+				aux_arr.append({'dom':p,'subdom':i})
+	for p in possible_domains:
+		print "Domain", p
+		for i in aux_arr:
+			if i['dom'] == p:
+				print "-", i['subdom']
+
+
+#################################################################3
+
 
 def address_in_network(ip,net):
 	def makeMask(n):
@@ -65,49 +117,3 @@ def address_in_network(ip,net):
 	address_ = dottedQuadToNum(ip)
 	network_ = networkMask(net.split("/")[0],net.split("/")[1])
 	return adress_ & network_ == network_
-
-
-def extract_domains():
-	f = open(sys.argv[1]).read().splitlines()
-	common_extensions = ["com","co","es","net","org","us"]
-	possible_domains = []
-
-	for i in f:
-		if len(i)>2:
-			splitted = i.split(".")
-			if splitted[len(splitted)-2] not in common_extensions:
-				pd = splitted[len(splitted)-2]+"."+splitted[len(splitted)-1]
-				if pd not in possible_domains:
-					possible_domains.append(pd)
-			else:
-				pd = splitted[len(splitted)-3]+"."+splitted[len(splitted)-2]+"."+splitted[len(splitted)-1]
-				if pd not in possible_domains:
-					possible_domains.append(pd)
-
-	for p in possible_domains:
-		print p
-
-
-
-def order_subdomains():
-	f = open(sys.argv[1]).read().splitlines()
-	common_extensions = ["com","co","es","net","org","us"]
-	possible_domains = []
-
-	for i in f:
-		if len(i)>2:
-			splitted = i.split(".")
-			if splitted[len(splitted)-2] not in common_extensions:
-				pd = splitted[len(splitted)-2]+"."+splitted[len(splitted)-1]
-				if pd not in possible_domains:
-					possible_domains.append(pd)
-			else:
-				pd = splitted[len(splitted)-3]+"."+splitted[len(splitted)-2]+"."+splitted[len(splitted)-1]
-				if pd not in possible_domains:
-					possible_domains.append(pd)
-
-	for p in possible_domains:
-		print "Domain: "+p
-		for i in f:
-			if p in f and i!=f:
-				print "- "+p
