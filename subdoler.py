@@ -2,11 +2,11 @@ import sys
 import os
 import subprocess
 import argparse
-import csv
+import xlsxwriter
 from config import *
 import range_domains
 import utils
-
+import csv
 
 
 def get_args():
@@ -83,35 +83,60 @@ def exec_commands(commands, type_):
 def join_files(output_file, ranges):
 	unique_subdomains = []
 	res_files = [{'name': amass_output_file,'code':'Amass'},{'name': ipv4info_output_file,'code':'IPv4info API'},{'name': findsubdomain_output_file,'code':'Findsubdomain API'},{'name': dnsdumpster_output_file,'code':'DNSDumpster API'},{'name': gobuster_output_file,'code':'Gobuster'},{'name': fdns_output_file,'code':'FDNS'}]
+	workbook = xlsxwriter.Workbook(output_file+".xlsx")
+	worksheet = workbook.add_worksheet("Subdomain by source")
+	row = 0
+	col = 0
 
-	with open(output_file,"w+") as csv_file:
-		writer = csv.writer(csv_file)
-		writer.writerow(["Subdomain", "Source", "IP", "Reversed IP", "IP in range"])
-		for f in res_files:
-			f_name = f['name']
-			if os.path.isfile(f_name):
-				print "Calculating data from",f_name
-				file_values = open(f_name).read().splitlines()
-				for v in file_values:
-					if len(v) > 2:
-						if f_name == 'Gobuster':
-							v = v.split(" ")[2]
-						if v not in unique_subdomains:
-							unique_subdomains.append(v)
-						calculated_ip =  subprocess.Popen(["dig", "+short", v], stdout=subprocess.PIPE).communicate()[0].replace("\n"," ")
-						reverse_dns = subprocess.Popen(["dig", "+short", calculated_ip.split(" ")[0]], stdout=subprocess.PIPE).communicate()[0].replace("\n"," ") if calculated_ip != "" else ""
-						ip_in_range = ""
-						if calculated_ip is not '' and ranges is not None:
-							for r in ranges:
-								if utils.ip_in_prefix(calculated_ip, r) is True:
-									ip_in_range = r
-									break
-						writer.writerow([v, f['code'], calculated_ip, reverse_dns, ip_in_range])
+	for i in ["Subdomain", "Source", "IP", "Reversed IP", "IP in range"]:
+		worksheet.write(row, col, i)
+		col += 1
+	col = 0
+	row += 1
 
+	csv_file = open(output_file+"-source.csv","w+") 
+	writer = csv.writer(csv_file)
+	writer.writerow(["Subdomain", "Source", "IP", "Reversed IP", "IP in range"])
+
+	for f in res_files:
+		f_name = f['name']
+		if os.path.isfile(f_name):
+			print "Calculating data from",f_name
+			file_values = open(f_name).read().splitlines()
+			for v in file_values:
+				if len(v) > 2:
+					if f_name == 'Gobuster':
+						v = v.split(" ")[2]
+					if v not in unique_subdomains:
+						unique_subdomains.append(v)
+					calculated_ip =  subprocess.Popen(["dig", "+short", v], stdout=subprocess.PIPE).communicate()[0].replace("\n"," ")
+					reverse_dns = subprocess.Popen(["dig", "+short", calculated_ip.split(" ")[0]], stdout=subprocess.PIPE).communicate()[0].replace("\n"," ") if calculated_ip != "" else ""
+					ip_in_range = ""
+					if calculated_ip is not '' and ranges is not None:
+						for r in ranges:
+							if utils.ip_in_prefix(calculated_ip, r) is True:
+								ip_in_range = r
+								break
+					writer.writerow([v, f['code'], calculated_ip, reverse_dns, ip_in_range])
+					for i in [v, f['code'], calculated_ip, reverse_dns, ip_in_range]:
+						worksheet.write(row, col, i)
+						col += 1
+					col = 0
+				row += 1
 	
+	csv_file = open(output_file+"-unique.csv","w+") 
+	writer = csv.writer(csv_file)
 	print "\n"+"-"*25+"\n"+"Unique subdomains: "+str(len(unique_subdomains))+"\n"+"-"*25
+	worksheet = workbook.add_worksheet("Unique subdomains")
+	row = 0
+	col = 0
 	for u in unique_subdomains:
 		print "-",u
+		worksheet.write(row, col, u)
+		writer.writerow(u)
+		row += 1
+	workbook.close()
+	print "\nOutput saved in "+output_file
 
 
 def main():

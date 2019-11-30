@@ -104,8 +104,6 @@ The final result is a CSV file which shows the list of subdomains, the DNS resol
 
 ## TODOS
 
-- Create sheet with the unique values (xlsxwriter).
-
 - Analysis with Shodan.
 
 - Concurency in range to domain? meh
