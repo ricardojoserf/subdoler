@@ -82,10 +82,8 @@ def range_extractor(ranges_file, companies_file, output_file):
 		length_ = int(r.split("/")[1])
 		arr_points = r.split("/")[0].split(".")
 		create_command(arr_points, length_, output_file)
-	#all_domains = utils.order_subdomains(output_file)
+	utils.order_subdomains(output_file)
 	return output_file, ranges
-
-
 
 
 def main():
@@ -99,7 +97,6 @@ def main():
 	output_file = args.output_file
 	range_extractor(ranges_file, companies_file, output_file)
 	
-
 
 if __name__== "__main__":
 	main()

@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 
 #################################################################3
 
-ipv4_base_url =   "http://ipv4info.com"
+ipv4_base_url = "http://ipv4info.com"
 
 def get_info_url(company_name):
 	search_url = ipv4_base_url + "/?act=check&ip="+company_name

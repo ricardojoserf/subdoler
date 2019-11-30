@@ -3,10 +3,10 @@ import os
 import subprocess
 import argparse
 import xlsxwriter
-from config import *
 import range_domains
-import utils
 import csv
+from config import *
+import utils
 
 
 def get_args():
@@ -15,25 +15,21 @@ def get_args():
 	parser.add_argument('-r', '--ranges_file', required=False, action='store', help='File with ranges to analyze')
 	parser.add_argument('-c', '--companies_file', required=False, action='store', help='File with ranges to analyze')
 	parser.add_argument('-o', '--output_file', default="result.csv", required=False, action='store', help='Csv file')
-	parser.add_argument('-t', '--type', required=False, default="terminal", action='store', help='Type of output (gnome-terminal/tmux)')
+	parser.add_argument('-t', '--type', required=False, default="tmux", action='store', help='Type of output (gnome-terminal/tmux)')
 	my_args = parser.parse_args()
 	return my_args
 
 
-def read_domains(domains_file):
-	return open(domains_file).read().splitlines()
-
-
 def create_commands(domains_file):
-	amass_cmd =         "amass enum --passive -d "+",".join(read_domains(domains_file))+" -o "+amass_output_file + "; echo Finished" #+ "; exit"
+	domains = open(domains_file).read().splitlines()
+	amass_cmd =         "amass enum --passive -d "+",".join(domains)+" -o "+amass_output_file + "; echo Finished" #+ "; exit"
 	findsubdomain_cmd = "python "+findsubdomain_script_file+" -f "+domains_file+" -a "+findsubdomain_token+" -o "+findsubdomain_output_file + "; echo Finished" #+ "; exit"
 	ipv4info_cmd =      "python "+ipv4info_script_file+" -f "+domains_file+" -a "+ipv4info_token+" -o "+ipv4info_output_file +"; echo Finished" #+ "; exit"
 	dnsdumpster_cmd =   "python "+dnsdumpster_script_file+" -f "+domains_file+" -o "+dnsdumpster_output_file +"; echo Finished" #+ "; exit"
-	fdns_cmd =          "zcat '"+fdns_file+"' | egrep '(" + "|\\.".join(read_domains(domains_file)) + ")' | cut -d ',' -f 2 | cut -d '\"' -f 4 | tee "+fdns_output_file  #+ "; exit"
+	fdns_cmd =          "zcat '"+fdns_file+"' | egrep '(" + "|\\.".join(domains) + ")' | cut -d ',' -f 2 | cut -d '\"' -f 4 | tee "+fdns_output_file  #+ "; exit"
 	gobuster_cmd =      ""
 	theharvester_cmd =  ""
 	pwndb_cmd =         "service tor start; "
-	domains = read_domains(domains_file)
 	for d in range(0, len(domains)):
 		domain = domains[d]
 		gobuster_cmd       += "echo; echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; echo; gobuster dns -t "+str(gobuster_threads)+" -w "+gobuster_dictionary+" -d "+domain+" -o "+gobuster_output_file+"_"+domain+"; "
@@ -93,11 +89,9 @@ def join_files(output_file, ranges):
 		col += 1
 	col = 0
 	row += 1
-
 	csv_file = open(output_file+"-source.csv","w+") 
 	writer = csv.writer(csv_file)
 	writer.writerow(["Subdomain", "Source", "IP", "Reversed IP", "IP in range"])
-
 	for f in res_files:
 		f_name = f['name']
 		if os.path.isfile(f_name):
@@ -123,20 +117,19 @@ def join_files(output_file, ranges):
 						col += 1
 					col = 0
 				row += 1
-	
-	csv_file = open(output_file+"-unique.csv","w+") 
+	csv_file = open(output_file+"-unique.txt","w+") 
 	writer = csv.writer(csv_file)
-	print "\n"+"-"*25+"\n"+"Unique subdomains: "+str(len(unique_subdomains))+"\n"+"-"*25
+	print "\n"+"-"*25+"Unique subdomains: "+str(len(unique_subdomains))+"\n"+"-"*25
 	worksheet = workbook.add_worksheet("Unique subdomains")
 	row = 0
 	col = 0
 	for u in unique_subdomains:
 		print "-",u
 		worksheet.write(row, col, u)
-		writer.writerow(u)
+		writer.writerow([u])
 		row += 1
 	workbook.close()
-	print "\nOutput saved in "+output_file
+	print "\nOutput saved in "+output_file+"-unique.txt, "+output_file+"-source.csv and"+output_file+".xlsx"
 
 
 def main():
@@ -146,18 +139,6 @@ def main():
 	type_ = args.type
 	ranges_file = args.ranges_file
 	companies_file = args.companies_file
-	if domains_file is None and ranges_file is None and companies_file is None:
-		print "Error: Domains, ranges or company file is necessary"
-		print "usage: subdoler.py [-h] [-d DOMAINS_FILE] [-r RANGES_FILE] [-c COMPANIES_FILE] [-o OUTPUT_FILE] [-t TYPE]"
-		sys.exit(1)
-	
-	ranges = None
-	if domains_file is None:
-		temp_domains_file = "/tmp/domains"
-		domains_file, ranges = range_domains.range_extractor(ranges_file, companies_file, temp_domains_file)
-
-	commands = create_commands(domains_file)
-	exec_commands(commands, type_)
 	print ""
 	print " .d8888b.           888           888          888"
 	print "d88P  Y88b          888           888          888                  "
@@ -170,6 +151,16 @@ def main():
 	print ""
 	print "      -  A (hopefully) less painful way to list subdomains -      "
 	print ""
+	if domains_file is None and ranges_file is None and companies_file is None:
+		print "Error: Domains, ranges or company file is necessary"
+		print "usage: subdoler.py [-h] [-d DOMAINS_FILE] [-r RANGES_FILE] [-c COMPANIES_FILE] [-o OUTPUT_FILE] [-t TYPE]"
+		sys.exit(1)
+	ranges = None
+	if domains_file is None:
+		temp_domains_file = "/tmp/domains"
+		domains_file, ranges = range_domains.range_extractor(ranges_file, companies_file, temp_domains_file)
+	commands = create_commands(domains_file)
+	exec_commands(commands, type_)
 	raw_input("\nPress Enter to continue when every terminal has 'Finished'...\n")
 	join_files(output_file, ranges)
 
