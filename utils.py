@@ -38,7 +38,7 @@ def get_ranges(company_name):
 						range_val = first_ip+"/"+str(j['range'])
 						ranges.append({'name':vals[8].getText(), 'range': range_val})
 						break		
-	#return ranges
+	return ranges
 
 
 #################################################################3
@@ -96,24 +96,22 @@ def order_subdomains(output_file):
 
 #################################################################3
 
+#Source: https://medium.com/@sadatnazrul/checking-if-ipv4-address-in-network-python-af61a54d714d
 
-def address_in_network(ip,net):
-	def makeMask(n):
-	    "return a mask of n bits as a long integer"
-	    return (2L<<n-1) - 1
+def ip_to_binary(ip):
+    octet_list_int = ip.split(".")
+    octet_list_bin = [format(int(i), '08b') for i in octet_list_int]
+    binary = ("").join(octet_list_bin)
+    return binary
 
-	def dottedQuadToNum(ip):
-	    "convert decimal dotted quad string to long integer"
-	    return struct.unpack('L',socket.inet_aton(ip))[0]
+def get_addr_network(address, net_size):
+    ip_bin = ip_to_binary(address)
+    network = ip_bin[0:32-(32-net_size)]    
+    return network
 
-	def networkMask(ip,bits):
-	    "Convert a network address to a long integer" 
-	    return dottedQuadToNum(ip) & makeMask(bits)
-
-	def addressInNetwork(ip,net):
-	   "Is an address in a network"
-	   return ip & net == net
-
-	address_ = dottedQuadToNum(ip)
-	network_ = networkMask(net.split("/")[0],net.split("/")[1])
-	return adress_ & network_ == network_
+def ip_in_prefix(ip_address, prefix):
+    [prefix_address, net_size] = prefix.split("/")
+    net_size = int(net_size)
+    prefix_network = get_addr_network(prefix_address, net_size)
+    ip_network = get_addr_network(ip_address, net_size)
+    return ip_network == prefix_network

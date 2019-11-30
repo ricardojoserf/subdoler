@@ -2,12 +2,12 @@ import sys
 import os
 import subprocess
 import argparse
-import socket
 import csv
 from config import *
-import time
-import csv
 import range_domains
+import utils
+
+
 
 def get_args():
 	parser = argparse.ArgumentParser()
@@ -42,20 +42,22 @@ def create_commands(domains_file):
 	gobuster_cmd     += "echo Finished" #+ "; exit"
 	theharvester_cmd += "echo Finished" #+ "; exit"
 	pwndb_cmd        += "echo Finished" #+ "; exit"
-	comandos = []
-	comandos.append({"titulo":"Borrando ficheros temporales", "comando":"touch /tmp/dummy_temp; ls /tmp/*_temp*; rm /tmp/*_temp*; echo 'Finished'", "active": True})
-	comandos.append({"titulo":"Amass - Passive Scan Mode", "comando": amass_cmd, "active": amass_active})
-	comandos.append({"titulo":"Findsubdomain - Subdomains", "comando": findsubdomain_cmd, "active": findsubdomain_active})
-	comandos.append({"titulo":"IPv4info - Subdomains", "comando": ipv4info_cmd, "active": ipv4info_active})
-	comandos.append({"titulo":"DNSDumpster - Subdomains", "comando": dnsdumpster_cmd, "active": dnsdumpster_active})
-	comandos.append({"titulo":"FDNS - Subdomain lister", "comando": fdns_cmd, "active": fdns_active})
-	comandos.append({"titulo":"Gobuster - Subdomain bruteforce", "comando": gobuster_cmd, "active": gobuster_active})
-	comandos.append({"titulo":"TheHarvester", "comando": theharvester_cmd, "active": theharvester_active})
-	comandos.append({"titulo":"Pwndb", "comando": pwndb_cmd, "active": pwndb_active})
-	return comandos
+	commands = []
+	commands.append({"title":"Borrando ficheros temporales", "command":"touch /tmp/dummy_temp; ls /tmp/*_temp*; rm /tmp/*_temp*; echo 'Finished'", "active": True})
+	commands.append({"title":"Amass - Passive Scan Mode", "command": amass_cmd, "active": amass_active})
+	if findsubdomain_token is not "" and findsubdomain_token is not "-":
+		commands.append({"title":"Findsubdomain - Subdomains", "command": findsubdomain_cmd, "active": findsubdomain_active})
+	if ipv4info_token is not "" and ipv4info_token is not "-":
+		commands.append({"title":"IPv4info - Subdomains", "command": ipv4info_cmd, "active": ipv4info_active})
+	commands.append({"title":"DNSDumpster - Subdomains", "command": dnsdumpster_cmd, "active": dnsdumpster_active})
+	commands.append({"title":"FDNS - Subdomain lister", "command": fdns_cmd, "active": fdns_active})
+	commands.append({"title":"Gobuster - Subdomain bruteforce", "command": gobuster_cmd, "active": gobuster_active})
+	commands.append({"title":"TheHarvester", "command": theharvester_cmd, "active": theharvester_active})
+	commands.append({"title":"Pwndb", "command": pwndb_cmd, "active": pwndb_active})
+	return commands
 
 
-def exec_commands(comandos, type_):
+def exec_commands(commands, type_):
 	if type_ == "tmux":
 		os.system("tmux kill-session -t subdoler 2>/dev/null")
 		f = open(tmuxp_yaml_file,"w")
@@ -64,27 +66,27 @@ def exec_commands(comandos, type_):
 		f.write("- window_name: dev window\n")
 		f.write("  layout: tiled\n")
 		f.write("  panes:\n")
-		for i in comandos:
+		for i in commands:
 			if i["active"]:
 				f.write('    - shell_command:\n    ')
-				cmd_ = i["comando"].replace(";", "\n        -")
-				f.write('    - echo {0} \n'.format(i["titulo"]))
+				cmd_ = i["command"].replace(";", "\n        -")
+				f.write('    - echo {0} \n'.format(i["title"]))
 				f.write('        - {0} \n'.format(cmd_))
 		tmux_cmd = "tmuxp load "+tmuxp_yaml_file
 		os.system('gnome-terminal -q -- bash -c "echo; {0}; exec bash" 2>/dev/null'.format(tmux_cmd))
 	else:
-		for i in comandos:
+		for i in commands:
 			if i["active"]:
-				os.system('gnome-terminal -q -- bash -c "echo; echo {0}; echo; {1}; exec bash" 2>/dev/null'.format(i["titulo"],i["comando"]))
+				os.system('gnome-terminal -q -- bash -c "echo; echo {0}; echo; {1}; exec bash" 2>/dev/null'.format(i["title"],i["command"]))
 
 
-def join_files(output_file):
+def join_files(output_file, ranges):
 	unique_subdomains = []
 	res_files = [{'name': amass_output_file,'code':'Amass'},{'name': ipv4info_output_file,'code':'IPv4info API'},{'name': findsubdomain_output_file,'code':'Findsubdomain API'},{'name': dnsdumpster_output_file,'code':'DNSDumpster API'},{'name': gobuster_output_file,'code':'Gobuster'},{'name': fdns_output_file,'code':'FDNS'}]
 
 	with open(output_file,"w+") as csv_file:
 		writer = csv.writer(csv_file)
-		writer.writerow(["Subdomain", "Source", "IP", "Reversed IP"])
+		writer.writerow(["Subdomain", "Source", "IP", "Reversed IP", "IP in range"])
 		for f in res_files:
 			f_name = f['name']
 			if os.path.isfile(f_name):
@@ -98,7 +100,14 @@ def join_files(output_file):
 							unique_subdomains.append(v)
 						calculated_ip =  subprocess.Popen(["dig", "+short", v], stdout=subprocess.PIPE).communicate()[0].replace("\n"," ")
 						reverse_dns = subprocess.Popen(["dig", "+short", calculated_ip.split(" ")[0]], stdout=subprocess.PIPE).communicate()[0].replace("\n"," ") if calculated_ip != "" else ""
-						writer.writerow([v, f['code'], calculated_ip, reverse_dns])
+						ip_in_range = ""
+						if calculated_ip is not '' and ranges is not None:
+							for r in ranges:
+								if utils.ip_in_prefix(calculated_ip, r) is True:
+									ip_in_range = r
+									break
+						writer.writerow([v, f['code'], calculated_ip, reverse_dns, ip_in_range])
+
 	
 	print "\n"+"-"*25+"\n"+"Unique subdomains: "+str(len(unique_subdomains))+"\n"+"-"*25
 	for u in unique_subdomains:
@@ -114,14 +123,16 @@ def main():
 	companies_file = args.companies_file
 	if domains_file is None and ranges_file is None and companies_file is None:
 		print "Error: Domains, ranges or company file is necessary"
+		print "usage: subdoler.py [-h] [-d DOMAINS_FILE] [-r RANGES_FILE] [-c COMPANIES_FILE] [-o OUTPUT_FILE] [-t TYPE]"
+		sys.exit(1)
 	
+	ranges = None
 	if domains_file is None:
 		temp_domains_file = "/tmp/domains"
-		domains_file = range_domains.range_extractor(ranges_file, companies_file, temp_domains_file)
+		domains_file, ranges = range_domains.range_extractor(ranges_file, companies_file, temp_domains_file)
 
-
-	comandos = create_commands(domains_file)
-	exec_commands(comandos, type_)
+	commands = create_commands(domains_file)
+	exec_commands(commands, type_)
 	print ""
 	print " .d8888b.           888           888          888"
 	print "d88P  Y88b          888           888          888                  "
@@ -135,7 +146,7 @@ def main():
 	print "      -  A (hopefully) less painful way to list subdomains -      "
 	print ""
 	raw_input("\nPress Enter to continue when every terminal has 'Finished'...\n")
-	join_files(output_file)
+	join_files(output_file, ranges)
 
 
 if __name__== "__main__":

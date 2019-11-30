@@ -73,7 +73,6 @@ def range_extractor(ranges_file, companies_file, output_file):
 		for c in companies:
 			ranges_info = utils.get_ranges(c)
 			print "\nCompany: "+c+"\n"
-			print ranges_info
 			for r in ranges_info:
 				print "- Range: %s   \tName: %s "%(r['range'], r['name'])
 				ranges.append(r['range'])
@@ -84,7 +83,7 @@ def range_extractor(ranges_file, companies_file, output_file):
 		arr_points = r.split("/")[0].split(".")
 		create_command(arr_points, length_, output_file)
 	#all_domains = utils.order_subdomains(output_file)
-	return output_file
+	return output_file, ranges
 
 
 

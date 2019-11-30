@@ -104,16 +104,8 @@ The final result is a CSV file which shows the list of subdomains, the DNS resol
 
 ## TODOS
 
-- Check api tokens values are ok or not. 
-
-- Rename functions and variables. 
-
-- Finish merge
-
-- Add the source of finding the subdomain -> Uniq after that with all -> Create sheet with the unique values (xlsxwriter).
-
-- Check if detected IP in the ranges.
+- Create sheet with the unique values (xlsxwriter).
 
 - Analysis with Shodan.
 
-- Concurency in range to domain?
+- Concurency in range to domain? meh
