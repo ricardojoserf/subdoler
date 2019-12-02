@@ -1,6 +1,96 @@
 # Subdoler
 
-Subdomain lister using some already created tools 
+Subdomain lister from a list of companies names, IP ranges or domains. 
+
+
+
+#### Subdomains *from* Companies list
+
+```
+python subdoler.py -c COMPANIES_FILE -o OUTPUT_PREFIX -t {tmux|gnome-terminal}
+```
+
+It calculates the IP ranges of the companies in IPv4info and extracts the domains in these IPs: 
+
+![image](images/image0.jpg)
+
+
+Then, it creates a Tmux session which calculates the subdomains of the calculated domains and subdomains:
+
+![image](images/image2.jpg)
+
+
+When the subdomains calculation finishes (when the user clicks the 'Enter' button), the unique subdomains are listed and the output is stored in 3 files:
+
+![image](images/image3.jpg)
+
+
+The CSV file contains the subdomains with the program which calculated them, the reverse lookup IP and which range it is part of. The TXT file contains a list of unique subdomains:
+
+![image](images/image4.jpg)
+
+
+The XLSX file contains the same information in two different sheets:
+
+![image](images/image5.jpg)
+
+![image](images/image6.jpg)
+
+
+
+#### Subdomains *from* IP ranges list
+
+
+```
+python subdoler.py  -r RANGES_FILE -o OUTPUT_PREFIX -t {tmux|gnome-terminal}
+```
+
+It skips the step of calculatig the ranges of the companies, working similarly but with the IP ranges directly:
+
+![image](images/image7.jpg)
+
+
+#### Subdomains *from* Domains list
+
+
+```
+python subdoler.py -d DOMAINS_FILE -o OUTPUT_PREFIX -t {tmux|gnome-terminal}
+```
+
+It skips the step of calculatig the ranges of the companies and the domains in IP ranges, working similarly but with the domains directly:
+
+![image](images/image8.jpg)
+
+
+----------------------------------------------------------
+
+#### Domains *from* Companies list
+
+```
+python range_domains.py -c COMPANIES_FILE -o OUTPUT_FILE
+```
+
+Using *range_domains.py* instead of *subdoler.py*, you can skip the final step of calculating the subdomains, calculating just the IP ranges of the companies and the domains in them:
+
+![image](images/image9.jpg)
+
+
+These are stored in the output file:
+
+![image](images/image10.jpg)
+
+
+#### Domains *from* IP ranges list
+
+Also using *range_domains.py* you can just get domains in IP ranges:
+
+```
+python range_domains.py -r RANGES_FILE -o OUTPUT_FILE
+```
+
+![image](images/image11.jpg)
+
+----------------------------------------------------------
 
 
 ## Installation
@@ -12,49 +102,7 @@ cd install/
 sh install.sh
 ```
 
-
-## Usage 1: Extract domains from a list of IP ranges
-
-```
-python range_domains.py -i INPUT_FILE -o OUTPUT_FILE
-```
-
-- INPUT_FILE: Text file with a list of IP ranges
-
-- OUTPUT_FILE: Text file with the list of domains
-
-
-
-#### Screenshots
-
-First, the IP addresses and the domains are displayed:
-
-![image](images/image10.jpg)
-
-The list of "main" domains (the ones with format *domain_name.domain_extension*) is displayed:
-
-![image](images/image11.jpg)
-
-The output file contains only the list of all the domains extracted from the IP addresses (not the "main" ones):
-
-![image](images/image12.jpg)
-
-
-
 ----------------------------------------------------------
-
-
-## Usage 2: Extract subdomains from a list of domains
-
-```
-python subdoler.py -i INPUT_FILE -o OUTPUT_FILE -t TYPE
-```
-
-- INPUT_FILE: Text file with a list of domains
-
-- OUTPUT_FILE: CSV file with the list of subdomains, their DNS resolution and reverse resolution.
-
-- TYPE: "tmux" opens a terminal with tmux sessions and "gnome" (default value) opens many terminals
 
 
 #### Options
@@ -73,37 +121,6 @@ To use these tools for subdomain enumeration set their value *True* in the *conf
 
 - [FDNS](https://opendata.rapid7.com/sonar.fdns_v2/) - You must [download the file from here](https://opendata.rapid7.com/sonar.fdns_v2/) and reference the file in the config.py file
 
-
-There are extra options for enumerating leaked information:
-
 - [TheHarvester](https://github.com/laramies/theHarvester): Search leaked email addresses
 
 - [PwnDB](https://github.com/davidtavarez/pwndb): Search leaked credentials (tor service gets started)
-
-
-
-#### Screenshots
-
-First, the input file with the list of domains and the output CSV files are set:
-
-![image](images/image1.jpg)
-
-Using the "-t tmux" option, a terminal with tmux sessions gets opened:
-
-![image](images/image2.jpg)
-
-When every tmux session has finished, press Enter and the list of subdomains appears:
-
-![image](images/image3.jpg)
-
-The final result is a CSV file which shows the list of subdomains, the DNS resolution and the reverse DNS resolution:
-
-![image](images/image4.jpg)
-
-
-
-## TODOS
-
-- Analysis with Shodan.
-
-- Concurency in range to domain? meh

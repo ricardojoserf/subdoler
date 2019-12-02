@@ -119,7 +119,7 @@ def join_files(output_file, ranges):
 				row += 1
 	csv_file = open(output_file+"-unique.txt","w+") 
 	writer = csv.writer(csv_file)
-	print "\n"+"-"*25+"Unique subdomains: "+str(len(unique_subdomains))+"\n"+"-"*25
+	print "\n"+"-"*25+"\n"+"Unique subdomains: "+str(len(unique_subdomains))+"\n"+"-"*25
 	worksheet = workbook.add_worksheet("Unique subdomains")
 	row = 0
 	col = 0
@@ -157,7 +157,7 @@ def main():
 		sys.exit(1)
 	ranges = None
 	if domains_file is None:
-		temp_domains_file = "/tmp/domains"
+		temp_domains_file = "/tmp/domains_temp"
 		domains_file, ranges = range_domains.range_extractor(ranges_file, companies_file, temp_domains_file)
 	commands = create_commands(domains_file)
 	exec_commands(commands, type_)
