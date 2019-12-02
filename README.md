@@ -7,8 +7,7 @@ Subdomain lister from a list of companies names, IP ranges or domains.
 
 ```
 git clone https://github.com/ricardojoserf/subdoler
-cd subdoler/
-cd install/
+cd subdoler/install/
 sh install.sh
 ```
 
@@ -40,11 +39,11 @@ There are extra options to enumerate leaked information:
 
 ## From Companies name
 
+It calculates the IP ranges of the companies in IPv4info and extracts the domains in these IPs. You can use a tmux session or let the program open many terminal windows: 
+
 ```
 python subdoler.py -c COMPANIES_FILE -o OUTPUT_PREFIX -t {tmux|gnome-terminal}
 ```
-
-It calculates the IP ranges of the companies in IPv4info and extracts the domains in these IPs: 
 
 ![image](images/image0.jpg)
 
@@ -75,11 +74,11 @@ The XLSX file contains the same information in two different sheets:
 ## From IP ranges
 
 
+It skips the step of calculatig the ranges of the companies, working similarly but with the IP ranges directly:
+
 ```
 python subdoler.py  -r RANGES_FILE -o OUTPUT_PREFIX -t {tmux|gnome-terminal}
 ```
-
-It skips the step of calculatig the ranges of the companies, working similarly but with the IP ranges directly:
 
 ![image](images/image7.jpg)
 
@@ -87,24 +86,25 @@ It skips the step of calculatig the ranges of the companies, working similarly b
 ## From Domains list
 
 
+It skips the step of calculatig the ranges of the companies and the domains in IP ranges, working similarly but with the domains directly:
+
 ```
 python subdoler.py -d DOMAINS_FILE -o OUTPUT_PREFIX -t {tmux|gnome-terminal}
 ```
-
-It skips the step of calculatig the ranges of the companies and the domains in IP ranges, working similarly but with the domains directly:
 
 ![image](images/image8.jpg)
 
 
 ----------------------------------------------------------
 
+
 ## Domains from Companies name
+
+Using *range_domains.py* instead of *subdoler.py*, you can skip the final step of calculating the subdomains, calculating just the IP ranges of the companies and the domains in them:
 
 ```
 python range_domains.py -c COMPANIES_FILE -o OUTPUT_FILE
 ```
-
-Using *range_domains.py* instead of *subdoler.py*, you can skip the final step of calculating the subdomains, calculating just the IP ranges of the companies and the domains in them:
 
 ![image](images/image9.jpg)
 
@@ -123,5 +123,3 @@ python range_domains.py -r RANGES_FILE -o OUTPUT_FILE
 ```
 
 ![image](images/image11.jpg)
-
-----------------------------------------------------------
