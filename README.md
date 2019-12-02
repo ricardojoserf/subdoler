@@ -3,8 +3,42 @@
 Subdomain lister from a list of companies names, IP ranges or domains. 
 
 
+## Installation
 
-#### Subdomains *from* Companies list
+```
+git clone https://github.com/ricardojoserf/subdoler
+cd subdoler/
+cd install/
+sh install.sh
+```
+
+## Subdomains enumeration settings
+
+Set the value to *True* in the *config.py* file to use these tools:
+
+- [Amass](https://github.com/OWASP/Amass) - Passive scan mode
+
+- [IPv4info](http://ipv4info.com/tools/api/) - Using the API (Token needed)
+
+- [Findsubdomains](https://findsubdomains.com/) - Using an API (Token needed)
+
+- [DNSDumpster](https://github.com/PaulSec/API-dnsdumpster.com) - Using a Python API
+
+- [Gobuster](https://github.com/OJ/gobuster) - Bruteforce mode with a custom dictionary (using one from this [repo](https://github.com/danielmiessler/SecLists) by default)
+
+- [FDNS](https://opendata.rapid7.com/sonar.fdns_v2/) - You must [download the file from here](https://opendata.rapid7.com/sonar.fdns_v2/) and set its path in *config.py*
+
+
+There are extra options to enumerate leaked information:
+
+- [TheHarvester](https://github.com/laramies/theHarvester): Search leaked email addresses
+
+- [PwnDB](https://github.com/davidtavarez/pwndb): Search leaked credentials (tor service gets started)
+
+----------------------------------------------------------
+
+
+## From Companies name
 
 ```
 python subdoler.py -c COMPANIES_FILE -o OUTPUT_PREFIX -t {tmux|gnome-terminal}
@@ -38,7 +72,7 @@ The XLSX file contains the same information in two different sheets:
 
 
 
-#### Subdomains *from* IP ranges list
+## From IP ranges
 
 
 ```
@@ -50,7 +84,7 @@ It skips the step of calculatig the ranges of the companies, working similarly b
 ![image](images/image7.jpg)
 
 
-#### Subdomains *from* Domains list
+## From Domains list
 
 
 ```
@@ -64,7 +98,7 @@ It skips the step of calculatig the ranges of the companies and the domains in I
 
 ----------------------------------------------------------
 
-#### Domains *from* Companies list
+## Domains from Companies name
 
 ```
 python range_domains.py -c COMPANIES_FILE -o OUTPUT_FILE
@@ -80,9 +114,9 @@ These are stored in the output file:
 ![image](images/image10.jpg)
 
 
-#### Domains *from* IP ranges list
+## Domains from IP ranges 
 
-Also using *range_domains.py* you can just get domains in IP ranges:
+Also using *range_domains.py* you can just get domains in IP ranges, skipping the step of calculating the IP ranges from the companies name:
 
 ```
 python range_domains.py -r RANGES_FILE -o OUTPUT_FILE
@@ -91,36 +125,3 @@ python range_domains.py -r RANGES_FILE -o OUTPUT_FILE
 ![image](images/image11.jpg)
 
 ----------------------------------------------------------
-
-
-## Installation
-
-```
-git clone https://github.com/ricardojoserf/subdoler
-cd subdoler/
-cd install/
-sh install.sh
-```
-
-----------------------------------------------------------
-
-
-#### Options
-
-To use these tools for subdomain enumeration set their value *True* in the *config.py* file:
-
-- [Amass](https://github.com/OWASP/Amass) - Only the passive scan mode
-
-- [IPv4info](http://ipv4info.com/tools/api/) - Using the API. Token needed
-
-- [Findsubdomains](https://findsubdomains.com/) - Using an API. Token needed
-
-- [DNSDumpster](https://github.com/PaulSec/API-dnsdumpster.com) - Using an unofficial API
-
-- [Gobuster](https://github.com/OJ/gobuster) - Bruteforce mode with a cusom dictionary (using one from this [repo](https://github.com/danielmiessler/SecLists) by default)
-
-- [FDNS](https://opendata.rapid7.com/sonar.fdns_v2/) - You must [download the file from here](https://opendata.rapid7.com/sonar.fdns_v2/) and reference the file in the config.py file
-
-- [TheHarvester](https://github.com/laramies/theHarvester): Search leaked email addresses
-
-- [PwnDB](https://github.com/davidtavarez/pwndb): Search leaked credentials (tor service gets started)
