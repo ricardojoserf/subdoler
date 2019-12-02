@@ -33,8 +33,8 @@ def create_commands(domains_file):
 	for d in range(0, len(domains)):
 		domain = domains[d]
 		gobuster_cmd       += "echo; echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; echo; gobuster dns -t "+str(gobuster_threads)+" -w "+gobuster_dictionary+" -d "+domain+" -o "+gobuster_output_file+"_"+domain+"; "
-		theharvester_cmd   += "echo; echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; echo; theHarvester -d " + domain + " -b google | grep '@' | tee "+harvester_output_file+"; " # -b baidu,censys,crtsh,dogpile,google,linkedin,netcraft,pgp,threatcrowd,twitter,vhost,yahoo
-		pwndb_cmd          += "echo; echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; echo; python " + pwndb_script_file + " --target @" + domain + " | grep '@' | awk '{print $2}' | tee "+pwndb_output_file+"; "
+		theharvester_cmd   += "echo; echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; echo; theHarvester -d " + domain + " -b google | grep '@' | grep -v donate >> "+harvester_output_file+"; " # -b baidu,censys,crtsh,dogpile,google,linkedin,netcraft,pgp,threatcrowd,twitter,vhost,yahoo
+		pwndb_cmd          += "echo; echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; echo; python " + pwndb_script_file + " --target @" + domain + " | grep '@' | awk '{print $2}' >> "+pwndb_output_file+"; "
 	gobuster_cmd     += "echo Finished" #+ "; exit"
 	theharvester_cmd += "echo Finished" #+ "; exit"
 	pwndb_cmd        += "echo Finished" #+ "; exit"
@@ -154,7 +154,7 @@ def join_files(output_file, ranges):
 			
 	workbook.close()
 
-	print "\nOutput saved in "+output_file+"-unique.txt, "+output_file+"-source.csv and"+output_file+".xlsx"
+	print "\nOutput saved in "+output_file+"-unique.txt, "+output_file+"-source.csv, "+output_file+"-leaked.txt and "+output_file+".xlsx"
 
 
 def main():
