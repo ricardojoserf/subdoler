@@ -20,6 +20,8 @@ findsubdomain_output_file = tmp_folder + "findsubdomain_temp"
 dnsdumpster_output_file	=   tmp_folder + "dnsdumpster_temp"
 gobuster_output_file =      tmp_folder + "gobuster_temp"
 fdns_output_file =          tmp_folder + "fdns_temp"
+pwndb_output_file =         tmp_folder + "pwndb_temp"
+harvester_output_file =     tmp_folder + "harvester_temp"
 merged_output_file =        tmp_folder + "merged_temp"
 
 # File paths

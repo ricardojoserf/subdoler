@@ -33,8 +33,8 @@ def create_commands(domains_file):
 	for d in range(0, len(domains)):
 		domain = domains[d]
 		gobuster_cmd       += "echo; echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; echo; gobuster dns -t "+str(gobuster_threads)+" -w "+gobuster_dictionary+" -d "+domain+" -o "+gobuster_output_file+"_"+domain+"; "
-		theharvester_cmd   += "echo; echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; echo; theHarvester -d " + domain + " -b google; " # -b baidu,censys,crtsh,dogpile,google,linkedin,netcraft,pgp,threatcrowd,twitter,vhost,yahoo
-		pwndb_cmd          += "echo; echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; echo; python " + pwndb_script_file + " --target @" + domain + "; "
+		theharvester_cmd   += "echo; echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; echo; theHarvester -d " + domain + " -b google | grep '@' | tee "+harvester_output_file+"; " # -b baidu,censys,crtsh,dogpile,google,linkedin,netcraft,pgp,threatcrowd,twitter,vhost,yahoo
+		pwndb_cmd          += "echo; echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; echo; python " + pwndb_script_file + " --target @" + domain + " | grep '@' | awk '{print $2}' | tee "+pwndb_output_file+"; "
 	gobuster_cmd     += "echo Finished" #+ "; exit"
 	theharvester_cmd += "echo Finished" #+ "; exit"
 	pwndb_cmd        += "echo Finished" #+ "; exit"
@@ -128,7 +128,32 @@ def join_files(output_file, ranges):
 		worksheet.write(row, col, u)
 		writer.writerow([u])
 		row += 1
+
+	csv_file = open(output_file+"-leaked.txt","w+") 
+	writer = csv.writer(csv_file)
+	worksheet = workbook.add_worksheet("Leaked information")
+	row = 0
+	col = 0
+	leaked = []
+	if os.path.isfile(harvester_output_file) or os.path.isfile(pwndb_output_file):
+		print "\n"+"-"*25+"\n"+"Leaked information"+"\n"+"-"*25 
+		if os.path.isfile(harvester_output_file):
+			print "\n"+"-"*25+"Leaked emails: "+"-"*25+"\n"
+			os.system("cat "+harvester_output_file)
+			file_values = open(harvester_output_file).read().splitlines()
+			leaked.extend(file_values)
+		if os.path.isfile(pwndb_output_file):
+			print "\n"+"-"*25+"Leaked credentials: "+"-"*25+"\n"
+			os.system("cat "+pwndb_output_file)
+			file_values = open(pwndb_output_file).read().splitlines()
+			leaked.extend(file_values)
+	for l in leaked:
+		worksheet.write(row, col, l)
+		writer.writerow([l])
+		row += 1
+			
 	workbook.close()
+
 	print "\nOutput saved in "+output_file+"-unique.txt, "+output_file+"-source.csv and"+output_file+".xlsx"
 
 

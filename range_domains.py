@@ -79,9 +79,12 @@ def range_extractor(ranges_file, companies_file, output_file):
 			if len(ranges_info) == 0:
 				print " - No data found"
 	for r in ranges:
-		length_ = int(r.split("/")[1])
-		arr_points = r.split("/")[0].split(".")
-		create_command(arr_points, length_, output_file)
+		try:
+			length_ = int(r.split("/")[1])
+			arr_points = r.split("/")[0].split(".")
+			create_command(arr_points, length_, output_file)
+		except:
+			pass
 	utils.order_subdomains(output_file)
 	return output_file, ranges
 
