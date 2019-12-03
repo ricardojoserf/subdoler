@@ -7,8 +7,7 @@ Subdomain lister from a list of companies names, IP ranges or domains.
 
 ```
 git clone https://github.com/ricardojoserf/subdoler
-cd subdoler/install/
-sh install.sh
+cd subdoler/install/ && sh install.sh && cd ..
 ```
 
 ## Subdomains enumeration settings

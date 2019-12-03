@@ -21,6 +21,9 @@ def get_args():
 
 
 def create_commands(domains_file):
+	if not os.path.isfile(domains_file):
+		print "\n"+"No domains calculated. Exiting..."
+		sys.exit(1)
 	domains = open(domains_file).read().splitlines()
 	amass_cmd =         "amass enum --passive -d "+",".join(domains)+" -o "+amass_output_file + "; echo Finished"
 	findsubdomain_cmd = "python "+findsubdomain_script_file+" -f "+domains_file+" -a "+findsubdomain_token+" -o "+findsubdomain_output_file + "; echo Finished"

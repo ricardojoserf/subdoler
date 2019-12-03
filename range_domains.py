@@ -87,7 +87,8 @@ def range_extractor(ranges_file, companies_file, output_file):
 			create_command(arr_points, length_, output_file, counter, len_ranges)
 		except:
 			pass
-	utils.order_subdomains(output_file)
+	if os.path.isfile(output_file):
+		utils.order_subdomains(output_file)
 	return output_file, ranges
 
 
