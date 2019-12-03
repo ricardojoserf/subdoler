@@ -154,7 +154,7 @@ def join_files(output_file, ranges):
 			
 	workbook.close()
 
-	print "\nOutput saved in "+output_file+"-unique.txt, "+output_file+"-source.csv and"+output_file+".xlsx"
+	print "\nOutput saved in "+output_file+"-unique.txt, "+output_file+"-source.csv, "+output_file+"-leaked.txt and "+output_file+".xlsx"
 
 
 def main():

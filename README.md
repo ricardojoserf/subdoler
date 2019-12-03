@@ -53,22 +53,33 @@ Then, it creates a Tmux session which calculates the subdomains of the calculate
 ![image](images/image2.jpg)
 
 
-When the subdomains calculation finishes (when the user clicks the 'Enter' button), the unique subdomains are listed and the output is stored in 3 files:
+The program will wait until the user clicks the 'Enter' button:
+
+![image](images/image2_5.jpg)
+
+
+When the subdomains calculation finishes, the unique subdomains are listed and the output is stored in files:
 
 ![image](images/image3.jpg)
 
+Four files are created:
 
-The CSV file contains the subdomains with the program which calculated them, the reverse lookup IP and which range it is part of. The TXT file contains a list of unique subdomains:
+- The CSV file (*prefix-source.csv*) contains the subdomains with the program which discovered them, the reverse lookup IP and which range it is part of
 
-![image](images/image4.jpg)
+- The subdomains TXT files (*prefix-unique.txt*) contains a list of unique subdomains.
+
+- The leaks TXT file (*prefix-leaked.txt*) contains the leaked email accounts and credentials. 
+
+- The XLSX file (*prefix.xlsx*) contains the same information in two different sheets.
 
 
-The XLSX file contains the same information in two different sheets:
+![image](images/image3_5.jpg)
 
 ![image](images/image5.jpg)
 
 ![image](images/image6.jpg)
 
+![image](images/image6_5.jpg)
 
 
 ## From IP ranges
