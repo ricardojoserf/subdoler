@@ -1,19 +1,20 @@
 import os
 
 # Options 
-amass_active                = True
+amass_active                = False
 findsubdomain_active        = False
 findsubdomain_token =       "-"
 ipv4info_active             = False
 ipv4info_token =            "-"
 dnsdumpster_active          = False
-fdns_active                 = True
-gobuster_active             = True
+fdns_active                 = False
+gobuster_active             = False
 theharvester_active         = True
 pwndb_active                = True
 
 # Temp files
 tmp_folder =                "/tmp/"
+temp_domains_file =         tmp_folder + "domains_temp"
 amass_output_file =         tmp_folder + "amass_temp"
 ipv4info_output_file  =     tmp_folder + "ipv4info_temp"
 findsubdomain_output_file = tmp_folder + "findsubdomain_temp"
@@ -25,7 +26,6 @@ harvester_output_file =     tmp_folder + "harvester_temp"
 merged_output_file =        tmp_folder + "merged_temp"
 
 # File paths
-#program_path =              "/root/subdoler/"
 program_path = 		    os.getcwd() + "/"
 apis_folder_path =          program_path + "APIs/"
 ipv4info_script_file =      apis_folder_path + "ipv4info.py"

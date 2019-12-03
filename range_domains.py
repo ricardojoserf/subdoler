@@ -13,15 +13,14 @@ def get_args():
   return my_args
 
 
-def create_command(arr_points, length_, output_file):
-	final_cmd = ""
+def create_command(arr_points, length_, output_file, counter, len_ranges):
 	if length_ < 8:
 		aux1 = 8 - length_
 		first_ = utils.get_base(int(arr_points[0]), int(8 - aux1))
 		last_ = first_ + 2**aux1 - 1
 		first_ip = str(first_) + ".0.0.0"
 		last_ip  = str(last_) + ".255.255.255"
-		print "\nRange: "+first_ip+"-"+last_ip+"\n"
+		print "\n"+"["+str(counter)+"/"+str(len_ranges)+"] "+"Range: "+first_ip+"-"+last_ip+"\n"
 		for j in range(first_, last_):
 			for i in range(0,255):
 				for h in range(0,255):
@@ -33,7 +32,7 @@ def create_command(arr_points, length_, output_file):
 		last_ = first_ + 2**aux1 - 1
 		first_ip = arr_points[0] + "." + str(first_) + ".0.0"
 		last_ip  = arr_points[0] + "." + str(last_) + ".255.255"
-		print "\nRange: "+first_ip+"-"+last_ip+"\n"
+		print "\n"+"["+str(counter)+"/"+str(len_ranges)+"] "+"Range: "+first_ip+"-"+last_ip+"\n"
 		for j in range(first_, last_):
 			for i in range(0,255):
 				for h in range(0,255):
@@ -44,7 +43,7 @@ def create_command(arr_points, length_, output_file):
 		last_ = first_ + 2**aux1 - 1
 		first_ip = arr_points[0] + "." + arr_points[1] + "." + str(first_) + ".0"
 		last_ip  = arr_points[0] + "." + arr_points[1] + "." + str(last_) + ".255"
-		print "\nRange: \t"+first_ip+"-"+last_ip+"\n"
+		print "\n"+"["+str(counter)+"/"+str(len_ranges)+"] "+"Range: "+first_ip+"-"+last_ip+"\n"
 		for j in range(first_, last_):
 			for i in range(0,255):
 				utils.resolve_ip(arr_points[0]+"."+arr_points[1] + "." + str(j) + "." + str(i), output_file)
@@ -54,7 +53,7 @@ def create_command(arr_points, length_, output_file):
 		last_ = first_ + 2**aux1 - 1
 		first_ip = arr_points[0] + "." + arr_points[1] + "."  + arr_points[2] + "."  + str(first_)
 		last_ip  = arr_points[0] + "." + arr_points[1] + "."  + arr_points[2] + "."  + str(last_)
-		print "\n\nRange: "+first_ip+"-"+last_ip+"\n"
+		print "\n"+"["+str(counter)+"/"+str(len_ranges)+"] "+"Range: "+first_ip+"-"+last_ip+"\n"
 		for j in range(first_, last_):
 			utils.resolve_ip(arr_points[0] + "." + arr_points[1] + "." + arr_points[2] + "." + str(j), output_file)
 	elif length_ == 32:
@@ -78,11 +77,14 @@ def range_extractor(ranges_file, companies_file, output_file):
 				ranges.append(r['range'])
 			if len(ranges_info) == 0:
 				print " - No data found"
+	counter = 0
+	len_ranges = len(ranges)
 	for r in ranges:
+		counter += 1
 		try:
 			length_ = int(r.split("/")[1])
 			arr_points = r.split("/")[0].split(".")
-			create_command(arr_points, length_, output_file)
+			create_command(arr_points, length_, output_file, counter, len_ranges)
 		except:
 			pass
 	utils.order_subdomains(output_file)

@@ -32,7 +32,7 @@ There are extra options to enumerate leaked information:
 
 - [TheHarvester](https://github.com/laramies/theHarvester): Search leaked email addresses
 
-- [PwnDB](https://github.com/davidtavarez/pwndb): Search leaked credentials (tor service gets started)
+- [PwnDB](https://github.com/davidtavarez/pwndb): Search leaked credentials (the service *tor* gets started)
 
 ----------------------------------------------------------
 

@@ -11,33 +11,33 @@ import utils
 
 def get_args():
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-d', '--domains_file', required=False, action='store', help='File with domains to analyze')
-	parser.add_argument('-r', '--ranges_file', required=False, action='store', help='File with ranges to analyze')
-	parser.add_argument('-c', '--companies_file', required=False, action='store', help='File with ranges to analyze')
-	parser.add_argument('-o', '--output_file', default="result.csv", required=False, action='store', help='Csv file')
-	parser.add_argument('-t', '--type', required=False, default="tmux", action='store', help='Type of output (gnome-terminal/tmux)')
+	parser.add_argument('-d', '--domains_file', required=False, default=None, action='store', help='File with domains to analyze')
+	parser.add_argument('-r', '--ranges_file', required=False, default=None, action='store', help='File with ranges to analyze')
+	parser.add_argument('-c', '--companies_file', required=False, default=None, action='store', help='File with ranges to analyze')
+	parser.add_argument('-o', '--output_file', required=False, default="result.csv", action='store', help='Csv file')
+	parser.add_argument('-t', '--type', required=False, default="tmux", action='store', help='Type of output (tmux/gnome-terminal)')
 	my_args = parser.parse_args()
 	return my_args
 
 
 def create_commands(domains_file):
 	domains = open(domains_file).read().splitlines()
-	amass_cmd =         "amass enum --passive -d "+",".join(domains)+" -o "+amass_output_file + "; echo Finished" #+ "; exit"
-	findsubdomain_cmd = "python "+findsubdomain_script_file+" -f "+domains_file+" -a "+findsubdomain_token+" -o "+findsubdomain_output_file + "; echo Finished" #+ "; exit"
-	ipv4info_cmd =      "python "+ipv4info_script_file+" -f "+domains_file+" -a "+ipv4info_token+" -o "+ipv4info_output_file +"; echo Finished" #+ "; exit"
-	dnsdumpster_cmd =   "python "+dnsdumpster_script_file+" -f "+domains_file+" -o "+dnsdumpster_output_file +"; echo Finished" #+ "; exit"
-	fdns_cmd =          "zcat '"+fdns_file+"' | egrep '(" + "|\\.".join(domains) + ")' | cut -d ',' -f 2 | cut -d '\"' -f 4 | tee "+fdns_output_file  #+ "; exit"
+	amass_cmd =         "amass enum --passive -d "+",".join(domains)+" -o "+amass_output_file + "; echo Finished"
+	findsubdomain_cmd = "python "+findsubdomain_script_file+" -f "+domains_file+" -a "+findsubdomain_token+" -o "+findsubdomain_output_file + "; echo Finished"
+	ipv4info_cmd =      "python "+ipv4info_script_file+" -f "+domains_file+" -a "+ipv4info_token+" -o "+ipv4info_output_file +"; echo Finished"
+	dnsdumpster_cmd =   "python "+dnsdumpster_script_file+" -f "+domains_file+" -o "+dnsdumpster_output_file +"; echo Finished"
+	fdns_cmd =          "zcat '"+fdns_file+"' | egrep '(" + "|\\.".join(domains) + ")' | cut -d ',' -f 2 | cut -d '\"' -f 4 | tee "+fdns_output_file
 	gobuster_cmd =      ""
 	theharvester_cmd =  ""
 	pwndb_cmd =         "service tor start; "
 	for d in range(0, len(domains)):
 		domain = domains[d]
-		gobuster_cmd       += "echo; echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; echo; gobuster dns -t "+str(gobuster_threads)+" -w "+gobuster_dictionary+" -d "+domain+" -o "+gobuster_output_file+"_"+domain+"; "
-		theharvester_cmd   += "echo; echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; echo; theHarvester -d " + domain + " -b google | grep '@' | tee "+harvester_output_file+"; " # -b baidu,censys,crtsh,dogpile,google,linkedin,netcraft,pgp,threatcrowd,twitter,vhost,yahoo
-		pwndb_cmd          += "echo; echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; echo; python " + pwndb_script_file + " --target @" + domain + " | grep '@' | awk '{print $2}' | tee "+pwndb_output_file+"; "
-	gobuster_cmd     += "echo Finished" #+ "; exit"
-	theharvester_cmd += "echo Finished" #+ "; exit"
-	pwndb_cmd        += "echo Finished" #+ "; exit"
+		gobuster_cmd       += "echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; gobuster dns -t "+str(gobuster_threads)+" -w "+gobuster_dictionary+" -d "+domain+" -o "+gobuster_output_file+"_"+domain+"; "
+		theharvester_cmd   += "echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; theHarvester -d " + domain + " -b google | grep '@' >> "+harvester_output_file+"; "
+		pwndb_cmd          += "echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; python " + pwndb_script_file + " --target @" + domain + " | grep '@' | grep -v donate | awk '{print $2}' >> "+pwndb_output_file+"; "
+	gobuster_cmd     += "echo Finished"
+	theharvester_cmd += "echo Finished"
+	pwndb_cmd        += "echo Finished"
 	commands = []
 	commands.append({"title":"Borrando ficheros temporales", "command":"touch /tmp/dummy_temp; ls /tmp/*_temp*; rm /tmp/*_temp*; echo 'Finished'", "active": True})
 	commands.append({"title":"Amass - Passive Scan Mode", "command": amass_cmd, "active": amass_active})
@@ -182,7 +182,8 @@ def main():
 		sys.exit(1)
 	ranges = None
 	if domains_file is None:
-		temp_domains_file = "/tmp/domains_temp"
+		if os.path.isfile(temp_domains_file):
+			os.remove(temp_domains_file)
 		domains_file, ranges = range_domains.range_extractor(ranges_file, companies_file, temp_domains_file)
 	commands = create_commands(domains_file)
 	exec_commands(commands, type_)
