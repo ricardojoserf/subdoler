@@ -23,7 +23,8 @@ def get_info_url(company_name):
 
 def get_ranges(company_name):
 	array_aux = [{'range': 32, 'val': 1}, {'range': 31, 'val': 2}, {'range': 30, 'val': 4}, {'range': 29, 'val': 8}, {'range': 28, 'val': 16}, {'range': 27, 'val': 32}, {'range': 26, 'val': 64}, {'range': 25, 'val': 128}, {'range': 24, 'val': 256}, {'range': 23, 'val': 512}, {'range': 22, 'val': 1024}, {'range': 21, 'val': 2048}, {'range': 20, 'val': 4096}, {'range': 19, 'val': 8192}, {'range': 18, 'val': 16384}, {'range': 17, 'val': 32768}, {'range': 16, 'val': 65536}, {'range': 15, 'val': 131072}, {'range': 14, 'val': 262144}, {'range': 13, 'val': 524288}, {'range': 12, 'val': 1048576}, {'range': 11, 'val': 2097152}, {'range': 10, 'val': 4194304}, {'range': 9, 'val': 8388608}, {'range': 8, 'val': 16777216}, {'range': 7, 'val': 33554432}, {'range': 6, 'val': 67108864}, {'range': 5, 'val': 134217728}, {'range': 4, 'val': 268435456}, {'range': 3, 'val': 536870912}, {'range': 2, 'val': 1073741824}, {'range': 1, 'val': 2147483648}]
-	ranges = []
+	calc_ranges = []
+	ranges_info =  []
 	info_url = ipv4_base_url + get_info_url(company_name)
 	r = requests.get(info_url)
 	soup = BeautifulSoup(r.content, 'html.parser')
@@ -31,14 +32,23 @@ def get_ranges(company_name):
 		vals = i.findAll('td')
 		if len(vals) == 10:
 			first_ip = vals[2].getText()
+			last_ip  = vals[3].getText()
 			range_size = vals[4].getText()
+			asn = vals[6].getText().replace("\n", " ")
+			block_name = vals[7].getText()
+			organization = vals[8].getText()
+			country = ""
+			for e in vals[9].findAll('a'):
+				country += e.getText() + " "
+			ranges_info.append({'organization': organization, 'block_name': block_name, 'first_ip': first_ip, 'last_ip': last_ip, 'range_size': range_size, 'asn': asn, 'country': country})
+			# Range translation to slash notation
 			if "Size" not in range_size:
 				for j in array_aux:
 					if (int(range_size)-int(j['val'])) <=0:
 						range_val = first_ip+"/"+str(j['range'])
-						ranges.append({'name':vals[8].getText(), 'range': range_val})
+						calc_ranges.append({'name':vals[8].getText(), 'range': range_val})
 						break		
-	return ranges
+	return calc_ranges, ranges_info
 
 
 #################################################################3

@@ -79,7 +79,7 @@ def exec_commands(commands, type_):
 				os.system('gnome-terminal -q -- bash -c "echo; echo {0}; echo; {1}; exec bash" 2>/dev/null'.format(i["title"],i["command"]))
 
 
-def join_files(output_file, ranges):
+def join_files(output_file, ranges, ranges_info):
 	unique_subdomains = []
 	res_files = [{'name': amass_output_file,'code':'Amass'},{'name': ipv4info_output_file,'code':'IPv4info API'},{'name': findsubdomain_output_file,'code':'Findsubdomain API'},{'name': dnsdumpster_output_file,'code':'DNSDumpster API'},{'name': gobuster_output_file,'code':'Gobuster'},{'name': fdns_output_file,'code':'FDNS'}]
 	workbook = xlsxwriter.Workbook(output_file+".xlsx")
@@ -154,10 +154,33 @@ def join_files(output_file, ranges):
 		worksheet.write(row, col, l)
 		writer.writerow([l])
 		row += 1
-			
+
+	if ranges_info is not None:
+		csv_file = open(output_file+"-ranges.csv","w+") 
+		writer = csv.writer(csv_file)
+		worksheet = workbook.add_worksheet("Ranges information")
+		row = 0
+		col = 0
+		heading = ["Organization", "Block name", "First IP", "Last IP", "Range size", "ASN", "Country"]
+		writer.writerow(heading)
+		for i in heading:
+			worksheet.write(row, col, i)
+			col += 1
+		col = 0
+		row += 1
+		for r in ranges_info:
+			file_values = [r['organization'], r['block_name'], r['first_ip'], r['last_ip'], r['range_size'], r['asn'], r['country']]
+			writer.writerow(file_values)
+			for val in file_values:
+				worksheet.write(row, col, val)
+				col += 1
+			col = 0
+			row += 1
+
+
 	workbook.close()
 
-	print "\nOutput saved in "+output_file+"-unique.txt, "+output_file+"-source.csv, "+output_file+"-leaked.txt and "+output_file+".xlsx"
+	print "\nOutput saved in "+output_file+"-unique.txt, "+output_file+"-source.csv, "+output_file+"-leaked.txt, " + output_file+"-ranges.csv and "+output_file+".xlsx"
 
 
 def main():
@@ -184,14 +207,15 @@ def main():
 		print "usage: subdoler.py [-h] [-d DOMAINS_FILE] [-r RANGES_FILE] [-c COMPANIES_FILE] [-o OUTPUT_FILE] [-t TYPE]"
 		sys.exit(1)
 	ranges = None
+	ranges_info = None
 	if domains_file is None:
 		if os.path.isfile(temp_domains_file):
 			os.remove(temp_domains_file)
-		domains_file, ranges = range_domains.range_extractor(ranges_file, companies_file, temp_domains_file)
+		domains_file, ranges, ranges_info = range_domains.range_extractor(ranges_file, companies_file, temp_domains_file)
 	commands = create_commands(domains_file)
 	exec_commands(commands, type_)
 	raw_input("\nPress Enter to continue when every terminal has 'Finished'...\n")
-	join_files(output_file, ranges)
+	join_files(output_file, ranges, ranges_info)
 
 
 if __name__== "__main__":

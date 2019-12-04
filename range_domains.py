@@ -70,12 +70,12 @@ def range_extractor(ranges_file, companies_file, output_file):
 	if companies_file is not None:
 		companies = open(companies_file).read().splitlines()
 		for c in companies:
-			ranges_info = utils.get_ranges(c)
+			calc_ranges, ranges_info = utils.get_ranges(c)
 			print "\nCompany: "+c+"\n"
-			for r in ranges_info:
+			for r in calc_ranges:
 				print "- Range: %s   \tName: %s "%(r['range'], r['name'])
 				ranges.append(r['range'])
-			if len(ranges_info) == 0:
+			if len(calc_ranges) == 0:
 				print " - No data found"
 	counter = 0
 	len_ranges = len(ranges)
@@ -89,7 +89,7 @@ def range_extractor(ranges_file, companies_file, output_file):
 			pass
 	if os.path.isfile(output_file):
 		utils.order_subdomains(output_file)
-	return output_file, ranges
+	return output_file, ranges, ranges_info
 
 
 def main():

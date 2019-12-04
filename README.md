@@ -16,15 +16,16 @@ Set the value to *True* in the *config.py* file to use these tools:
 
 - [Amass](https://github.com/OWASP/Amass) - Passive scan mode
 
+- [Gobuster](https://github.com/OJ/gobuster) - Bruteforce mode with a custom dictionary (using one from this [repo](https://github.com/danielmiessler/SecLists) by default)
+
 - [IPv4info](http://ipv4info.com/tools/api/) - Using the API (Token needed)
 
 - [Findsubdomains](https://findsubdomains.com/) - Using an API (Token needed)
 
 - [DNSDumpster](https://github.com/PaulSec/API-dnsdumpster.com) - Using a Python API
 
-- [Gobuster](https://github.com/OJ/gobuster) - Bruteforce mode with a custom dictionary (using one from this [repo](https://github.com/danielmiessler/SecLists) by default)
-
 - [FDNS](https://opendata.rapid7.com/sonar.fdns_v2/) - You must [download the file from here](https://opendata.rapid7.com/sonar.fdns_v2/) and set its path in *config.py*
+
 
 
 There are extra options to enumerate leaked information:
@@ -65,11 +66,13 @@ Four files are created:
 
 - The CSV file (*prefix-source.csv*) contains the subdomains with the program which discovered them, the reverse lookup IP and which range it is part of
 
+- The second CSV file (*prefix-ranges.csv*) contains information about the ranges
+
 - The subdomains TXT files (*prefix-unique.txt*) contains a list of unique subdomains.
 
 - The leaks TXT file (*prefix-leaked.txt*) contains the leaked email accounts and credentials. 
 
-- The XLSX file (*prefix.xlsx*) contains the same information in two different sheets.
+- The XLSX file (*prefix.xlsx*) contains the same information in different sheets.
 
 
 ![image](images/image3_5.jpg)

@@ -1,14 +1,15 @@
 import os
 
-# Options 
-amass_active                = False
+# Subdomains enumeration options 
+amass_active                = True
+gobuster_active             = True
 findsubdomain_active        = False
-findsubdomain_token =       "-"
+findsubdomain_token 		= "-"
 ipv4info_active             = False
-ipv4info_token =            "-"
+ipv4info_token  			= "-"
 dnsdumpster_active          = False
 fdns_active                 = False
-gobuster_active             = False
+# Leaks
 theharvester_active         = True
 pwndb_active                = True
 
