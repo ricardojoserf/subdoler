@@ -1,6 +1,11 @@
 stash.sqlite
 config.py
 config.*
+APIs/API-dnsdumpster.com/*
+APIs/*.txt
+APIs/*.csv
+APIs/pwndb/*
+*.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

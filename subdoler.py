@@ -32,11 +32,12 @@ def create_commands(domains_file):
 	fdns_cmd =          "zcat '"+fdns_file+"' | egrep '(" + "|\\.".join(domains) + ")' | cut -d ',' -f 2 | cut -d '\"' -f 4 | tee "+fdns_output_file
 	gobuster_cmd =      ""
 	theharvester_cmd =  ""
+	theharvester_binary = utils.bin_path("theHarvester","theharvester")
 	pwndb_cmd =         "service tor start; "
 	for d in range(0, len(domains)):
 		domain = domains[d]
 		gobuster_cmd       += "echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; gobuster dns -t "+str(gobuster_threads)+" -w "+gobuster_dictionary+" -d "+domain+" -o "+gobuster_output_file+"_"+domain+"; "
-		theharvester_cmd   += "echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; theHarvester -d " + domain + " -b google | grep '@' >> "+harvester_output_file+"; "
+		theharvester_cmd   += "echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; "+theharvester_binary+" -d " + domain + " -b google | grep '@' >> "+harvester_output_file+"; "
 		pwndb_cmd          += "echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; python " + pwndb_script_file + " --target @" + domain + " | grep '@' | grep -v donate | awk '{print $2}' >> "+pwndb_output_file+"; "
 	gobuster_cmd     += "echo Finished"
 	theharvester_cmd += "echo Finished"

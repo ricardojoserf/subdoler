@@ -4,7 +4,7 @@ import socket
 import struct
 import requests
 from bs4 import BeautifulSoup
-
+import distutils.spawn
 
 #################################################################3
 
@@ -125,3 +125,13 @@ def ip_in_prefix(ip_address, prefix):
     prefix_network = get_addr_network(prefix_address, net_size)
     ip_network = get_addr_network(ip_address, net_size)
     return ip_network == prefix_network
+
+#################################################################3
+
+def bin_path(name1, name2):
+    if distutils.spawn.find_executable(name1) is not None:
+    	return name1
+    elif distutils.spawn.find_executable(name2) is not None:
+    	return name2
+    else:
+    	return "notfound"
