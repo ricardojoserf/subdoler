@@ -14,7 +14,7 @@ def get_args():
 	parser.add_argument('-d', '--domains_file', required=False, default=None, action='store', help='File with domains to analyze')
 	parser.add_argument('-r', '--ranges_file', required=False, default=None, action='store', help='File with ranges to analyze')
 	parser.add_argument('-c', '--companies_file', required=False, default=None, action='store', help='File with ranges to analyze')
-	parser.add_argument('-o', '--output_file', required=False, default="result.csv", action='store', help='Csv file')
+	parser.add_argument('-o', '--output_directory', required=False, default="result.csv", action='store', help='Csv file')
 	parser.add_argument('-t', '--type', required=False, default="tmux", action='store', help='Type of output (tmux/gnome-terminal)')
 	my_args = parser.parse_args()
 	return my_args
@@ -61,11 +61,11 @@ def exec_commands(commands, type_):
 	if type_ == "tmux":
 		os.system("tmux kill-session -t subdoler 2>/dev/null")
 		f = open(tmuxp_yaml_file,"w")
-		f.write("session_name: subdoler\n")
-		f.write("windows:\n")
-		f.write("- window_name: dev window\n")
-		f.write("  layout: tiled\n")
-		f.write("  panes:\n")
+		f.write("session_name: subdoler"+"\n")
+		f.write("windows:"+"\n")
+		f.write("- window_name: dev window"+"\n")
+		f.write("  layout: tiled"+"\n")
+		f.write("  panes:"+"\n")
 		for i in commands:
 			if i["active"]:
 				f.write('    - shell_command:\n    ')
@@ -80,10 +80,14 @@ def exec_commands(commands, type_):
 				os.system('gnome-terminal -q -- bash -c "echo; echo {0}; echo; {1}; exec bash" 2>/dev/null'.format(i["title"],i["command"]))
 
 
-def join_files(output_file, ranges, ranges_info):
+def join_files(output_dir, ranges, ranges_info):
 	unique_subdomains = []
 	res_files = [{'name': amass_output_file,'code':'Amass'},{'name': ipv4info_output_file,'code':'IPv4info API'},{'name': findsubdomain_output_file,'code':'Findsubdomain API'},{'name': dnsdumpster_output_file,'code':'DNSDumpster API'},{'name': gobuster_output_file,'code':'Gobuster'},{'name': fdns_output_file,'code':'FDNS'}]
-	workbook = xlsxwriter.Workbook(output_file+".xlsx")
+	output_dir = output_dir + "/" if not output_dir.endswith("/") else output_dir
+	if not os.path.exists(output_dir):
+		os.makedirs(output_dir)
+		
+	workbook = xlsxwriter.Workbook(output_dir+"results.xlsx")
 	worksheet = workbook.add_worksheet("Subdomain by source")
 	row = 0
 	col = 0
@@ -93,7 +97,7 @@ def join_files(output_file, ranges, ranges_info):
 		col += 1
 	col = 0
 	row += 1
-	csv_file = open(output_file+"-source.csv","w+") 
+	csv_file = open(output_dir+"subdomain_by_source.csv","w+") 
 	writer = csv.writer(csv_file)
 	writer.writerow(["Subdomain", "Source", "IP", "Reversed IP", "IP in range"])
 	for f in res_files:
@@ -107,21 +111,27 @@ def join_files(output_file, ranges, ranges_info):
 						v = v.split(" ")[2]
 					if v not in unique_subdomains:
 						unique_subdomains.append(v)
-					calculated_ip =  subprocess.Popen(["dig", "+short", v], stdout=subprocess.PIPE).communicate()[0].replace("\n"," ")
-					reverse_dns = subprocess.Popen(["dig", "+short", calculated_ip.split(" ")[0]], stdout=subprocess.PIPE).communicate()[0].replace("\n"," ") if calculated_ip != "" else ""
-					ip_in_range = ""
-					if calculated_ip is not '' and ranges is not None:
-						for r in ranges:
-							if utils.ip_in_prefix(calculated_ip, r) is True:
-								ip_in_range = r
+					calculated_ips =  subprocess.Popen(["dig", "+short", v], stdout=subprocess.PIPE).communicate()[0].replace("\n"," ").split(" ")
+					for calculated_ip in calculated_ips:
+						try:
+							if len(calculated_ip) == 0 and len(calculated_ips) >= 2:
 								break
-					writer.writerow([v, f['code'], calculated_ip, reverse_dns, ip_in_range])
-					for i in [v, f['code'], calculated_ip, reverse_dns, ip_in_range]:
-						worksheet.write(row, col, i)
-						col += 1
-					col = 0
-				row += 1
-	csv_file = open(output_file+"-unique.txt","w+") 
+							reverse_dns = subprocess.Popen(["dig", "+short", calculated_ip.split(" ")[0]], stdout=subprocess.PIPE).communicate()[0].replace("\n"," ") if calculated_ip != "" else ""
+							ip_in_range = ""
+							if calculated_ip is not '' and ranges is not None:
+								for r in ranges:
+									if utils.ip_in_prefix(calculated_ip, r) is True:
+										ip_in_range = r
+										break
+							writer.writerow([v, f['code'], calculated_ip, reverse_dns, ip_in_range])
+							for i in [v, f['code'], calculated_ip, reverse_dns, ip_in_range]:
+								worksheet.write(row, col, i)
+								col += 1
+							col = 0
+							row += 1
+						except:
+							pass
+	csv_file = open(output_dir+"unique_subdomains.txt","w+") 
 	writer = csv.writer(csv_file)
 	print "\n"+"-"*25+"\n"+"Unique subdomains: "+str(len(unique_subdomains))+"\n"+"-"*25
 	worksheet = workbook.add_worksheet("Unique subdomains")
@@ -133,7 +143,7 @@ def join_files(output_file, ranges, ranges_info):
 		writer.writerow([u])
 		row += 1
 
-	csv_file = open(output_file+"-leaked.txt","w+") 
+	csv_file = open(output_dir+"leaked_information.txt","w+") 
 	writer = csv.writer(csv_file)
 	worksheet = workbook.add_worksheet("Leaked information")
 	row = 0
@@ -157,7 +167,7 @@ def join_files(output_file, ranges, ranges_info):
 		row += 1
 
 	if ranges_info is not None:
-		csv_file = open(output_file+"-ranges.csv","w+") 
+		csv_file = open(output_dir+"ranges_information.csv","w+") 
 		writer = csv.writer(csv_file)
 		worksheet = workbook.add_worksheet("Ranges information")
 		row = 0
@@ -178,16 +188,14 @@ def join_files(output_file, ranges, ranges_info):
 			col = 0
 			row += 1
 
-
 	workbook.close()
-
-	print "\nOutput saved in "+output_file+"-unique.txt, "+output_file+"-source.csv, "+output_file+"-leaked.txt, " + output_file+"-ranges.csv and "+output_file+".xlsx"
+	print "\n"+"Output saved in "+output_dir
 
 
 def main():
 	args = get_args()
 	domains_file = args.domains_file
-	output_file = args.output_file
+	output_directory = args.output_directory
 	type_ = args.type
 	ranges_file = args.ranges_file
 	companies_file = args.companies_file
@@ -205,7 +213,7 @@ def main():
 	print ""
 	if domains_file is None and ranges_file is None and companies_file is None:
 		print "Error: Domains, ranges or company file is necessary"
-		print "usage: subdoler.py [-h] [-d DOMAINS_FILE] [-r RANGES_FILE] [-c COMPANIES_FILE] [-o OUTPUT_FILE] [-t TYPE]"
+		print "usage: subdoler.py [-h] [-d DOMAINS_FILE] [-r RANGES_FILE] [-c COMPANIES_FILE] [-o OUTPUT_DIRECTORY] [-t TYPE]"
 		sys.exit(1)
 	ranges = None
 	ranges_info = None
@@ -215,8 +223,8 @@ def main():
 		domains_file, ranges, ranges_info = range_domains.range_extractor(ranges_file, companies_file, temp_domains_file)
 	commands = create_commands(domains_file)
 	exec_commands(commands, type_)
-	raw_input("\nPress Enter to continue when every terminal has 'Finished'...\n")
-	join_files(output_file, ranges, ranges_info)
+	raw_input("\n"+"Press Enter to continue when every terminal has 'Finished'..."+"\n")
+	join_files(output_directory, ranges, ranges_info)
 
 
 if __name__== "__main__":
