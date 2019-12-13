@@ -88,6 +88,7 @@ def exec_commands(commands, type_):
 
 
 def join_files(output_dir, ranges, ranges_info):
+	test_timeout = 5
 	unique_subdomains = []
 	res_files = [{'name': amass_output_file,'code':'Amass'},{'name': ipv4info_output_file,'code':'IPv4info API'},{'name': findsubdomain_output_file,'code':'Findsubdomain API'},{'name': dnsdumpster_output_file,'code':'DNSDumpster API'},{'name': gobuster_output_file,'code':'Gobuster'},{'name': fdns_output_file,'code':'FDNS'}]
 	output_dir = output_dir + "/" if not output_dir.endswith("/") else output_dir
@@ -109,7 +110,7 @@ def join_files(output_dir, ranges, ranges_info):
 	for f in res_files:
 		f_name = f['name']
 		if os.path.isfile(f_name):
-			print("Calculating data from"+f_name)
+			print("Calculating data from "+f_name)
 			file_values = open(f_name).read().splitlines()
 			for v in file_values:
 				if len(v) > 2:
@@ -117,7 +118,14 @@ def join_files(output_dir, ranges, ranges_info):
 						v = v.split(" ")[2]
 					if v not in unique_subdomains:
 						unique_subdomains.append(v)
-					calculated_ips =  subprocess.Popen(["dig", "+short", v], stdout=subprocess.PIPE, encoding='utf8').communicate()[0].replace("\n"," ").split(" ")
+					try:
+						if six.PY2:
+							calculated_ips =  subprocess.Popen(["dig", "+short", v], stdout=subprocess.PIPE).communicate(timeout = test_timeout)[0].replace("\n"," ").split(" ")
+						else:
+							calculated_ips =  subprocess.Popen(["dig", "+short", v], stdout=subprocess.PIPE, encoding='utf8').communicate(timeout = test_timeout)[0].replace("\n"," ").split(" ")
+					except Exception as e:
+						print(str(e))
+						calculated_ips = ['']					
 					if calculated_ips == ['']:
 						data_array = [v, f['code'], '', '', '']
 						writer.writerow(data_array)
@@ -126,28 +134,36 @@ def join_files(output_dir, ranges, ranges_info):
 							col += 1
 						col = 0
 						row += 1
-						break
-					for calculated_ip in calculated_ips:
-						print (len(calculated_ip))
-						try:
-							if calculated_ip == '' and len(calculated_ips) >= 2:
-								break
-							reverse_dns = subprocess.Popen(["dig", "+short", calculated_ip.split(" ")[0]], stdout=subprocess.PIPE, encoding='utf8').communicate()[0].replace("\n"," ") if calculated_ip != "" else ""
-							ip_in_range = ""
-							if calculated_ip is not '' and ranges is not None:
-								for r in ranges:
-									if utils.ip_in_prefix(calculated_ip, r) is True:
-										ip_in_range = r
-										break
-							data_array = [v, f['code'], calculated_ip, reverse_dns, ip_in_range]
-							writer.writerow(data_array)
-							for i in data_array:
-								worksheet.write(row, col, i)
-								col += 1
-							col = 0
-							row += 1
-						except:
-							pass
+					else:
+						for calculated_ip in calculated_ips:
+							try:
+								if calculated_ip == '' and len(calculated_ips) >= 2:
+									break
+								if calculated_ip == ";;":
+									break
+								try:
+									if six.PY2:
+										reverse_dns = subprocess.Popen(["dig", "+short", calculated_ip], stdout=subprocess.PIPE).communicate(timeout = test_timeout)[0].replace("\n"," ") if calculated_ip != "" else ""
+									else:
+										reverse_dns = subprocess.Popen(["dig", "+short", calculated_ip], stdout=subprocess.PIPE, encoding='utf8').communicate(timeout = test_timeout)[0].replace("\n"," ") if calculated_ip != "" else ""		
+								except Exception as e:
+									print(str(e))
+									reverse_dns = ''
+								ip_in_range = ""
+								if calculated_ip is not '' and ranges is not None:
+									for r in ranges:
+										if utils.ip_in_prefix(calculated_ip, r) is True:
+											ip_in_range = r
+											break
+								data_array = [v, f['code'], calculated_ip, reverse_dns, ip_in_range]
+								writer.writerow(data_array)
+								for i in data_array:
+									worksheet.write(row, col, i)
+									col += 1
+								col = 0
+								row += 1
+							except:
+								pass
 	csv_file = open(output_dir+"unique_subdomains.txt","w+") 
 	writer = csv.writer(csv_file)
 	print("\n"+"-"*25+"\n"+"Unique subdomains: "+str(len(unique_subdomains))+"\n"+"-"*25)

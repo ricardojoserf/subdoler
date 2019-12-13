@@ -35,8 +35,10 @@ dnsdumpster_script_file =   apis_folder_path + "API-dnsdumpster.com/api.py"
 pwndb_script_file =         apis_folder_path + "pwndb/pwndb.py"
 # Gobuster
 gobuster_dictionary =       apis_folder_path + "bitquark-subdomains-top100000.txt"
-gobuster_threads =          10
+gobuster_threads =          50
 # FDNS
 fdns_file =                 "/media/root/Seagate Expansion Drive/fdns.json.gz"
 #tmux
 tmuxp_yaml_file = 	    tmp_folder + "subolder_temp.yaml"
+#dig
+dig_timeout     = 		7

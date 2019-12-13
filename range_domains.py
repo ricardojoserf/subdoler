@@ -65,6 +65,7 @@ def create_command(arr_points, length_, output_file, counter, len_ranges):
 
 def range_extractor(ranges_file, companies_file, output_file):
 	ranges = []
+	ranges_info = None
 	if ranges_file is not None:
 		ranges = open(ranges_file).read().splitlines()
 	if companies_file is not None:
