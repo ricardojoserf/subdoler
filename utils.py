@@ -17,7 +17,7 @@ def get_info_url(company_name):
 	    for resp in response.history:
 	        return resp.headers['Location']
 	else:
-		print "Failed to get IPv4info page for that company"
+		print("Failed to get IPv4info page for that company")
 		sys.exit(1)
 
 
@@ -76,32 +76,32 @@ def order_subdomains(output_file):
 	common_extensions = ["com","co","es","net","org","us"]
 	possible_domains = []
 
-	print "\n"+"-"*25+"\n"+"Domains list"+"\n"+"-"*25
+	print("\n"+"-"*25+"\n"+"Domains list"+"\n"+"-"*25)
 	for i in f:
 		if len(i)>2:
 			splitted = i.split(".")
 			if splitted[len(splitted)-2] not in common_extensions:
 				pd = splitted[len(splitted)-2]+"."+splitted[len(splitted)-1]
 				if pd not in possible_domains:
-					print "-", pd
+					print("-", pd)
 					possible_domains.append(pd)
 			else:
 				pd = splitted[len(splitted)-3]+"."+splitted[len(splitted)-2]+"."+splitted[len(splitted)-1]
 				if pd not in possible_domains:
-					print "-", pd
+					print("-", pd)
 					possible_domains.append(pd)
 
-	print "\n"+"-"*25+"\n"+"Subdomains list"+"\n"+"-"*25
+	print("\n"+"-"*25+"\n"+"Subdomains list"+"\n"+"-"*25)
 	aux_arr = []
 	for i in f:
 		for p in possible_domains:
 			if p in i:
 				aux_arr.append({'dom':p,'subdom':i})
 	for p in possible_domains:
-		print "Domain", p
+		print("Domain", p)
 		for i in aux_arr:
 			if i['dom'] == p:
-				print "-", i['subdom']
+				print("-", i['subdom'])
 	return f
 
 #################################################################3

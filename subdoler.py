@@ -7,6 +7,8 @@ import range_domains
 import csv
 from config import *
 import utils
+from six.moves import input
+import six
 
 
 def get_args():
@@ -21,14 +23,19 @@ def get_args():
 
 
 def create_commands(domains_file):
+	python_bin = ""
+	if six.PY2:
+		python_bin = utils.bin_path("python2", "python")
+	else:
+		python_bin = utils.bin_path("python3", "python")
 	if not os.path.isfile(domains_file):
-		print "\n"+"No domains calculated. Exiting..."
+		print("\n"+"No domains calculated. Exiting...")
 		sys.exit(1)
 	domains = open(domains_file).read().splitlines()
 	amass_cmd =         "amass enum --passive -d "+",".join(domains)+" -o "+amass_output_file + "; echo Finished"
-	findsubdomain_cmd = "python "+findsubdomain_script_file+" -f "+domains_file+" -a "+findsubdomain_token+" -o "+findsubdomain_output_file + "; echo Finished"
-	ipv4info_cmd =      "python "+ipv4info_script_file+" -f "+domains_file+" -a "+ipv4info_token+" -o "+ipv4info_output_file +"; echo Finished"
-	dnsdumpster_cmd =   "python "+dnsdumpster_script_file+" -f "+domains_file+" -o "+dnsdumpster_output_file +"; echo Finished"
+	findsubdomain_cmd = python_bin+" "+findsubdomain_script_file+" -f "+domains_file+" -a "+findsubdomain_token+" -o "+findsubdomain_output_file + "; echo Finished"
+	ipv4info_cmd =      python_bin+" "+ipv4info_script_file+" -f "+domains_file+" -a "+ipv4info_token+" -o "+ipv4info_output_file +"; echo Finished"
+	dnsdumpster_cmd =   python_bin+" "+dnsdumpster_script_file+" -f "+domains_file+" -o "+dnsdumpster_output_file +"; echo Finished"
 	fdns_cmd =          "zcat '"+fdns_file+"' | egrep '(" + "|\\.".join(domains) + ")' | cut -d ',' -f 2 | cut -d '\"' -f 4 | tee "+fdns_output_file
 	gobuster_cmd =      ""
 	theharvester_cmd =  ""
@@ -37,13 +44,13 @@ def create_commands(domains_file):
 	for d in range(0, len(domains)):
 		domain = domains[d]
 		gobuster_cmd       += "echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; gobuster dns -t "+str(gobuster_threads)+" -w "+gobuster_dictionary+" -d "+domain+" -o "+gobuster_output_file+"_"+domain+"; "
-		theharvester_cmd   += "echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; "+theharvester_binary+" -d " + domain + " -b google | grep '@' >> "+harvester_output_file+"; "
-		pwndb_cmd          += "echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; python " + pwndb_script_file + " --target @" + domain + " | grep '@' | grep -v donate | awk '{print $2}' >> "+pwndb_output_file+"; "
+		theharvester_cmd   += "echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; "+theharvester_binary+" -d " + domain + " -b google | grep -v cmartorella | grep '@' >> "+harvester_output_file+"; "
+		pwndb_cmd          += "echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; " + python_bin +" "+ pwndb_script_file + " --target @" + domain + " | grep '@' | grep -v donate | awk '{print $2}' >> "+pwndb_output_file+"; "
 	gobuster_cmd     += "echo Finished"
 	theharvester_cmd += "echo Finished"
 	pwndb_cmd        += "echo Finished"
 	commands = []
-	commands.append({"title":"Borrando ficheros temporales", "command":"touch /tmp/dummy_temp; ls /tmp/*_temp*; rm /tmp/*_temp*; echo 'Finished'", "active": True})
+	#commands.append({"title":"Borrando ficheros temporales", "command":"touch /tmp/dummy_temp; ls /tmp/*_temp*; rm /tmp/*_temp*; echo 'Finished'", "active": True})
 	commands.append({"title":"Amass - Passive Scan Mode", "command": amass_cmd, "active": amass_active})
 	if findsubdomain_token is not "" and findsubdomain_token is not "-":
 		commands.append({"title":"Findsubdomain - Subdomains", "command": findsubdomain_cmd, "active": findsubdomain_active})
@@ -85,8 +92,7 @@ def join_files(output_dir, ranges, ranges_info):
 	res_files = [{'name': amass_output_file,'code':'Amass'},{'name': ipv4info_output_file,'code':'IPv4info API'},{'name': findsubdomain_output_file,'code':'Findsubdomain API'},{'name': dnsdumpster_output_file,'code':'DNSDumpster API'},{'name': gobuster_output_file,'code':'Gobuster'},{'name': fdns_output_file,'code':'FDNS'}]
 	output_dir = output_dir + "/" if not output_dir.endswith("/") else output_dir
 	if not os.path.exists(output_dir):
-		os.makedirs(output_dir)
-		
+		os.makedirs(output_dir)	
 	workbook = xlsxwriter.Workbook(output_dir+"results.xlsx")
 	worksheet = workbook.add_worksheet("Subdomain by source")
 	row = 0
@@ -103,7 +109,7 @@ def join_files(output_dir, ranges, ranges_info):
 	for f in res_files:
 		f_name = f['name']
 		if os.path.isfile(f_name):
-			print "Calculating data from",f_name
+			print("Calculating data from"+f_name)
 			file_values = open(f_name).read().splitlines()
 			for v in file_values:
 				if len(v) > 2:
@@ -111,20 +117,31 @@ def join_files(output_dir, ranges, ranges_info):
 						v = v.split(" ")[2]
 					if v not in unique_subdomains:
 						unique_subdomains.append(v)
-					calculated_ips =  subprocess.Popen(["dig", "+short", v], stdout=subprocess.PIPE).communicate()[0].replace("\n"," ").split(" ")
+					calculated_ips =  subprocess.Popen(["dig", "+short", v], stdout=subprocess.PIPE, encoding='utf8').communicate()[0].replace("\n"," ").split(" ")
+					if calculated_ips == ['']:
+						data_array = [v, f['code'], '', '', '']
+						writer.writerow(data_array)
+						for i in data_array:
+							worksheet.write(row, col, i)
+							col += 1
+						col = 0
+						row += 1
+						break
 					for calculated_ip in calculated_ips:
+						print (len(calculated_ip))
 						try:
-							if len(calculated_ip) == 0 and len(calculated_ips) >= 2:
+							if calculated_ip == '' and len(calculated_ips) >= 2:
 								break
-							reverse_dns = subprocess.Popen(["dig", "+short", calculated_ip.split(" ")[0]], stdout=subprocess.PIPE).communicate()[0].replace("\n"," ") if calculated_ip != "" else ""
+							reverse_dns = subprocess.Popen(["dig", "+short", calculated_ip.split(" ")[0]], stdout=subprocess.PIPE, encoding='utf8').communicate()[0].replace("\n"," ") if calculated_ip != "" else ""
 							ip_in_range = ""
 							if calculated_ip is not '' and ranges is not None:
 								for r in ranges:
 									if utils.ip_in_prefix(calculated_ip, r) is True:
 										ip_in_range = r
 										break
-							writer.writerow([v, f['code'], calculated_ip, reverse_dns, ip_in_range])
-							for i in [v, f['code'], calculated_ip, reverse_dns, ip_in_range]:
+							data_array = [v, f['code'], calculated_ip, reverse_dns, ip_in_range]
+							writer.writerow(data_array)
+							for i in data_array:
 								worksheet.write(row, col, i)
 								col += 1
 							col = 0
@@ -133,12 +150,12 @@ def join_files(output_dir, ranges, ranges_info):
 							pass
 	csv_file = open(output_dir+"unique_subdomains.txt","w+") 
 	writer = csv.writer(csv_file)
-	print "\n"+"-"*25+"\n"+"Unique subdomains: "+str(len(unique_subdomains))+"\n"+"-"*25
+	print("\n"+"-"*25+"\n"+"Unique subdomains: "+str(len(unique_subdomains))+"\n"+"-"*25)
 	worksheet = workbook.add_worksheet("Unique subdomains")
 	row = 0
 	col = 0
 	for u in unique_subdomains:
-		print "-",u
+		print("-"+u)
 		worksheet.write(row, col, u)
 		writer.writerow([u])
 		row += 1
@@ -150,21 +167,22 @@ def join_files(output_dir, ranges, ranges_info):
 	col = 0
 	leaked = []
 	if os.path.isfile(harvester_output_file) or os.path.isfile(pwndb_output_file):
-		print "\n"+"-"*25+"\n"+"Leaked information"+"\n"+"-"*25 
+		print("\n"+"-"*25+"\n"+"Leaked information"+"\n"+"-"*25)
 		if os.path.isfile(harvester_output_file):
-			print "\n"+"-"*25+"Leaked emails: "+"-"*25+"\n"
-			os.system("cat "+harvester_output_file)
+			print("\n"+"-"*25+"Leaked emails: "+"-"*25+"\n")
+			os.system("cat "+harvester_output_file+ " | grep -v cmartorella")
 			file_values = open(harvester_output_file).read().splitlines()
 			leaked.extend(file_values)
 		if os.path.isfile(pwndb_output_file):
-			print "\n"+"-"*25+"Leaked credentials: "+"-"*25+"\n"
+			print("\n"+"-"*25+"Leaked credentials: "+"-"*25+"\n")
 			os.system("cat "+pwndb_output_file)
 			file_values = open(pwndb_output_file).read().splitlines()
 			leaked.extend(file_values)
 	for l in leaked:
-		worksheet.write(row, col, l)
-		writer.writerow([l])
-		row += 1
+		if "cmartorella" in leaked:
+			worksheet.write(row, col, l)
+			writer.writerow([l])
+			row += 1
 
 	if ranges_info is not None:
 		csv_file = open(output_dir+"ranges_information.csv","w+") 
@@ -187,9 +205,10 @@ def join_files(output_dir, ranges, ranges_info):
 				col += 1
 			col = 0
 			row += 1
-
 	workbook.close()
-	print "\n"+"Output saved in "+output_dir
+	print ("\n"+"Cleaning temporary files...")
+	os.system("touch /tmp/dummy_temp; rm /tmp/*_temp*;")
+	print("Done! Output saved in "+output_dir)
 
 
 def main():
@@ -199,21 +218,21 @@ def main():
 	type_ = args.type
 	ranges_file = args.ranges_file
 	companies_file = args.companies_file
-	print ""
-	print " .d8888b.           888           888          888"
-	print "d88P  Y88b          888           888          888                  "
-	print "Y88b.               888           888          888                  "
-	print " *Y888b.   888  888 88888b.   .d88888  .d88b.  888  .d88b.  888d888 "
-	print "    *Y88b. 888  888 888 *88b d88* 888 d88**88b 888 d8P  Y8b 888P"
-	print "      *888 888  888 888  888 888  888 888  888 888 88888888 888     "
-	print "Y88b  d88P Y88b 888 888 d88P Y88b 888 Y88..88P 888 Y8b.     888     "
-	print " *Y8888P*   *Y88888 88888P*   *Y88888  *Y88P*  888  *Y8888  888"
-	print ""
-	print "      -  A (hopefully) less painful way to list subdomains -      "
-	print ""
+	print( "")
+	print( " .d8888b.           888           888          888")
+	print( "d88P  Y88b          888           888          888                  ")
+	print( "Y88b.               888           888          888                  ")
+	print( " *Y888b.   888  888 88888b.   .d88888  .d88b.  888  .d88b.  888d888 ")
+	print( "    *Y88b. 888  888 888 *88b d88* 888 d88**88b 888 d8P  Y8b 888P")
+	print( "      *888 888  888 888  888 888  888 888  888 888 88888888 888     ")
+	print( "Y88b  d88P Y88b 888 888 d88P Y88b 888 Y88..88P 888 Y8b.     888     ")
+	print( " *Y8888P*   *Y88888 88888P*   *Y88888  *Y88P*  888  *Y8888  888")
+	print( "")
+	print( "      -  A (hopefully) less painful way to list subdomains -      ")
+	print( "")
 	if domains_file is None and ranges_file is None and companies_file is None:
-		print "Error: Domains, ranges or company file is necessary"
-		print "usage: subdoler.py [-h] [-d DOMAINS_FILE] [-r RANGES_FILE] [-c COMPANIES_FILE] [-o OUTPUT_DIRECTORY] [-t TYPE]"
+		print( "Error: Domains, ranges or company file is necessary")
+		print( "usage: subdoler.py [-h] [-d DOMAINS_FILE] [-r RANGES_FILE] [-c COMPANIES_FILE] [-o OUTPUT_DIRECTORY] [-t TYPE]")
 		sys.exit(1)
 	ranges = None
 	ranges_info = None
@@ -223,7 +242,7 @@ def main():
 		domains_file, ranges, ranges_info = range_domains.range_extractor(ranges_file, companies_file, temp_domains_file)
 	commands = create_commands(domains_file)
 	exec_commands(commands, type_)
-	raw_input("\n"+"Press Enter to continue when every terminal has 'Finished'..."+"\n")
+	input("\n"+"Press 'Enter' to continue when everything has finished..."+"\n")
 	join_files(output_directory, ranges, ranges_info)
 
 
