@@ -4,9 +4,9 @@ import os
 amass_active                = True
 gobuster_active             = True
 findsubdomain_active        = False
-findsubdomain_token 		= "-"
+findsubdomain_token         = "-"
 ipv4info_active             = False
-ipv4info_token  			= "-"
+ipv4info_token              = "-"
 dnsdumpster_active          = False
 fdns_active                 = False
 # Leaks
@@ -27,7 +27,7 @@ harvester_output_file =     tmp_folder + "harvester_temp"
 merged_output_file =        tmp_folder + "merged_temp"
 
 # File paths
-program_path = 		    os.getcwd() + "/"
+program_path =              os.getcwd() + "/"
 apis_folder_path =          program_path + "APIs/"
 ipv4info_script_file =      apis_folder_path + "ipv4info.py"
 findsubdomain_script_file = apis_folder_path + "findsub.py"
@@ -39,6 +39,7 @@ gobuster_threads =          50
 # FDNS
 fdns_file =                 "/media/root/Seagate Expansion Drive/fdns.json.gz"
 #tmux
-tmuxp_yaml_file = 	    tmp_folder + "subolder_temp.yaml"
+tmuxp_yaml_file =           tmp_folder + "subolder_temp.yaml"
 #dig
-dig_timeout     = 		7
+dig_timeout     =           5
+dig_threads     =           3

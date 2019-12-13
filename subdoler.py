@@ -9,7 +9,10 @@ from config import *
 import utils
 from six.moves import input
 import six
+import multiprocessing, time
+import progressbar
 
+unique_subdomains = []
 
 def get_args():
 	parser = argparse.ArgumentParser()
@@ -50,7 +53,6 @@ def create_commands(domains_file):
 	theharvester_cmd += "echo Finished"
 	pwndb_cmd        += "echo Finished"
 	commands = []
-	#commands.append({"title":"Borrando ficheros temporales", "command":"touch /tmp/dummy_temp; ls /tmp/*_temp*; rm /tmp/*_temp*; echo 'Finished'", "active": True})
 	commands.append({"title":"Amass - Passive Scan Mode", "command": amass_cmd, "active": amass_active})
 	if findsubdomain_token is not "" and findsubdomain_token is not "-":
 		commands.append({"title":"Findsubdomain - Subdomains", "command": findsubdomain_cmd, "active": findsubdomain_active})
@@ -87,18 +89,16 @@ def exec_commands(commands, type_):
 				os.system('gnome-terminal -q -- bash -c "echo; echo {0}; echo; {1}; exec bash" 2>/dev/null'.format(i["title"],i["command"]))
 
 
-def join_files(output_dir, ranges, ranges_info):
-	test_timeout = 5
-	unique_subdomains = []
+def analyze(output_dir, ranges, ranges_info):
 	res_files = [{'name': amass_output_file,'code':'Amass'},{'name': ipv4info_output_file,'code':'IPv4info API'},{'name': findsubdomain_output_file,'code':'Findsubdomain API'},{'name': dnsdumpster_output_file,'code':'DNSDumpster API'},{'name': gobuster_output_file,'code':'Gobuster'},{'name': fdns_output_file,'code':'FDNS'}]
 	output_dir = output_dir + "/" if not output_dir.endswith("/") else output_dir
 	if not os.path.exists(output_dir):
 		os.makedirs(output_dir)	
 	workbook = xlsxwriter.Workbook(output_dir+"results.xlsx")
+	# Subdomains by source
 	worksheet = workbook.add_worksheet("Subdomain by source")
 	row = 0
 	col = 0
-
 	for i in ["Subdomain", "Source", "IP", "Reversed IP", "IP in range"]:
 		worksheet.write(row, col, i)
 		col += 1
@@ -110,21 +110,27 @@ def join_files(output_dir, ranges, ranges_info):
 	for f in res_files:
 		f_name = f['name']
 		if os.path.isfile(f_name):
-			print("Calculating data from "+f_name)
 			file_values = open(f_name).read().splitlines()
+			print("Calculating data from "+str(len(file_values))+" entries in "+f_name)
+			#analyze_values(f, file_values, writer, worksheet, row, col)
+			bar = progressbar.ProgressBar(maxval=len(file_values), widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+			bar.start()
+			bar_counter = 0
 			for v in file_values:
+				bar_counter += 1
+				bar.update(bar_counter)
 				if len(v) > 2:
-					if f_name == 'Gobuster':
+					if f['name'] == 'Gobuster':
 						v = v.split(" ")[2]
 					if v not in unique_subdomains:
 						unique_subdomains.append(v)
 					try:
 						if six.PY2:
-							calculated_ips =  subprocess.Popen(["dig", "+short", v], stdout=subprocess.PIPE).communicate(timeout = test_timeout)[0].replace("\n"," ").split(" ")
+							calculated_ips =  subprocess.Popen(["dig", "+short", v], stdout=subprocess.PIPE).communicate(timeout = dig_timeout)[0].replace("\n"," ").split(" ")
 						else:
-							calculated_ips =  subprocess.Popen(["dig", "+short", v], stdout=subprocess.PIPE, encoding='utf8').communicate(timeout = test_timeout)[0].replace("\n"," ").split(" ")
+							calculated_ips =  subprocess.Popen(["dig", "+short", v], stdout=subprocess.PIPE, encoding='utf8').communicate(timeout = dig_timeout)[0].replace("\n"," ").split(" ")
 					except Exception as e:
-						print(str(e))
+						#print(str(e))
 						calculated_ips = ['']					
 					if calculated_ips == ['']:
 						data_array = [v, f['code'], '', '', '']
@@ -143,11 +149,11 @@ def join_files(output_dir, ranges, ranges_info):
 									break
 								try:
 									if six.PY2:
-										reverse_dns = subprocess.Popen(["dig", "+short", calculated_ip], stdout=subprocess.PIPE).communicate(timeout = test_timeout)[0].replace("\n"," ") if calculated_ip != "" else ""
+										reverse_dns = subprocess.Popen(["dig", "+short", calculated_ip], stdout=subprocess.PIPE).communicate(timeout = dig_timeout)[0].replace("\n"," ") if calculated_ip != "" else ""
 									else:
-										reverse_dns = subprocess.Popen(["dig", "+short", calculated_ip], stdout=subprocess.PIPE, encoding='utf8').communicate(timeout = test_timeout)[0].replace("\n"," ") if calculated_ip != "" else ""		
+										reverse_dns = subprocess.Popen(["dig", "+short", calculated_ip], stdout=subprocess.PIPE, encoding='utf8').communicate(timeout = dig_timeout)[0].replace("\n"," ") if calculated_ip != "" else ""		
 								except Exception as e:
-									print(str(e))
+									#print(str(e))
 									reverse_dns = ''
 								ip_in_range = ""
 								if calculated_ip is not '' and ranges is not None:
@@ -164,6 +170,9 @@ def join_files(output_dir, ranges, ranges_info):
 								row += 1
 							except:
 								pass
+			bar.finish()
+
+	# Unique subdomains
 	csv_file = open(output_dir+"unique_subdomains.txt","w+") 
 	writer = csv.writer(csv_file)
 	print("\n"+"-"*25+"\n"+"Unique subdomains: "+str(len(unique_subdomains))+"\n"+"-"*25)
@@ -175,7 +184,7 @@ def join_files(output_dir, ranges, ranges_info):
 		worksheet.write(row, col, u)
 		writer.writerow([u])
 		row += 1
-
+	# Leaked information
 	csv_file = open(output_dir+"leaked_information.txt","w+") 
 	writer = csv.writer(csv_file)
 	worksheet = workbook.add_worksheet("Leaked information")
@@ -199,7 +208,7 @@ def join_files(output_dir, ranges, ranges_info):
 			worksheet.write(row, col, l)
 			writer.writerow([l])
 			row += 1
-
+	# Range information
 	if ranges_info is not None:
 		csv_file = open(output_dir+"ranges_information.csv","w+") 
 		writer = csv.writer(csv_file)
@@ -221,6 +230,7 @@ def join_files(output_dir, ranges, ranges_info):
 				col += 1
 			col = 0
 			row += 1
+	##############################################################
 	workbook.close()
 	print ("\n"+"Cleaning temporary files...")
 	os.system("touch /tmp/dummy_temp; rm /tmp/*_temp*;")
@@ -259,7 +269,7 @@ def main():
 	commands = create_commands(domains_file)
 	exec_commands(commands, type_)
 	input("\n"+"Press 'Enter' to continue when everything has finished..."+"\n")
-	join_files(output_directory, ranges, ranges_info)
+	analyze(output_directory, ranges, ranges_info)
 
 
 if __name__== "__main__":
