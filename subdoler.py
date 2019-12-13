@@ -89,8 +89,8 @@ def exec_commands(commands, type_):
 				os.system('gnome-terminal -q -- bash -c "echo; echo {0}; echo; {1}; exec bash" 2>/dev/null'.format(i["title"],i["command"]))
 
 
-def analyze(output_dir, ranges, ranges_info):
-	res_files = [{'name': amass_output_file,'code':'Amass'},{'name': ipv4info_output_file,'code':'IPv4info API'},{'name': findsubdomain_output_file,'code':'Findsubdomain API'},{'name': dnsdumpster_output_file,'code':'DNSDumpster API'},{'name': gobuster_output_file,'code':'Gobuster'},{'name': fdns_output_file,'code':'FDNS'}]
+def analyze(output_dir, ranges, ranges_info, domains_file):
+	res_files = [{'name': domains_file,'code':'Dig (IP range)'},{'name': amass_output_file,'code':'Amass'},{'name': ipv4info_output_file,'code':'IPv4info API'},{'name': findsubdomain_output_file,'code':'Findsubdomain API'},{'name': dnsdumpster_output_file,'code':'DNSDumpster API'},{'name': gobuster_output_file,'code':'Gobuster'},{'name': fdns_output_file,'code':'FDNS'}]
 	output_dir = output_dir + "/" if not output_dir.endswith("/") else output_dir
 	if not os.path.exists(output_dir):
 		os.makedirs(output_dir)	
@@ -269,7 +269,7 @@ def main():
 	commands = create_commands(domains_file)
 	exec_commands(commands, type_)
 	input("\n"+"Press 'Enter' to continue when everything has finished..."+"\n")
-	analyze(output_directory, ranges, ranges_info)
+	analyze(output_directory, ranges, ranges_info, domains_file)
 
 
 if __name__== "__main__":
