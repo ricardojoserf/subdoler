@@ -47,7 +47,10 @@ def create_commands(domains_file):
 	for d in range(0, len(domains)):
 		domain = domains[d]
 		gobuster_cmd       += "echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; gobuster dns -t "+str(gobuster_threads)+" -w "+gobuster_dictionary+" -d "+domain+" -o "+gobuster_output_file+"_"+domain+"; "
-		theharvester_cmd   += "echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; "+theharvester_binary+" -d " + domain + " -b google | grep -v cmartorella | grep '@' >> "+harvester_output_file+"; "
+		if theharvester_binary != "notfound":
+			theharvester_cmd   += "echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; "+theharvester_binary+" -d " + domain + " -b google | grep -v cmartorella | grep '@' >> "+harvester_output_file+"; "
+		else:
+			theharvester_cmd   += "echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; "+python_bin+" "+harvester_script_file+" -d " + domain + " -b google | grep -v cmartorella | grep '@' >> "+harvester_output_file+"; "
 		pwndb_cmd          += "echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; " + python_bin +" "+ pwndb_script_file + " --target @" + domain + " | grep '@' | grep -v donate | awk '{print $2}' >> "+pwndb_output_file+"; "
 	gobuster_cmd     += "echo Finished"
 	theharvester_cmd += "echo Finished"
@@ -82,11 +85,12 @@ def exec_commands(commands, type_):
 				f.write('    - echo {0} \n'.format(i["title"]))
 				f.write('        - {0} \n'.format(cmd_))
 		tmux_cmd = "tmuxp load "+tmuxp_yaml_file
-		os.system('gnome-terminal -q -- bash -c "echo; {0}; exec bash" 2>/dev/null'.format(tmux_cmd))
+		tmux_gnome_cmd = 'gnome-terminal -- bash -c "echo; {0}; exec bash" 2>/dev/null'.format(tmux_cmd)
+		os.system(tmux_gnome_cmd)
 	else:
 		for i in commands:
 			if i["active"]:
-				os.system('gnome-terminal -q -- bash -c "echo; echo {0}; echo; {1}; exec bash" 2>/dev/null'.format(i["title"],i["command"]))
+				os.system('gnome-terminal -- bash -c "echo; echo {0}; echo; {1}; exec bash" 2>/dev/null'.format(i["title"],i["command"]))
 
 
 def analyze(output_dir, ranges, ranges_info, domains_file):
@@ -94,6 +98,7 @@ def analyze(output_dir, ranges, ranges_info, domains_file):
 	output_dir = output_dir + "/" if not output_dir.endswith("/") else output_dir
 	if not os.path.exists(output_dir):
 		os.makedirs(output_dir)	
+		os.chmod(path, 0o444)
 	workbook = xlsxwriter.Workbook(output_dir+"results.xlsx")
 	# Subdomains by source
 	worksheet = workbook.add_worksheet("Subdomain by source")
@@ -131,7 +136,7 @@ def analyze(output_dir, ranges, ranges_info, domains_file):
 							calculated_ips =  subprocess.Popen(["dig", "+short", v], stdout=subprocess.PIPE, encoding='utf8').communicate(timeout = dig_timeout)[0].replace("\n"," ").split(" ")
 					except Exception as e:
 						#print(str(e))
-						calculated_ips = ['']					
+						calculated_ips = ['']
 					if calculated_ips == ['']:
 						data_array = [v, f['code'], '', '', '']
 						writer.writerow(data_array)

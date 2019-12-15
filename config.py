@@ -33,6 +33,8 @@ ipv4info_script_file =      apis_folder_path + "ipv4info.py"
 findsubdomain_script_file = apis_folder_path + "findsub.py"
 dnsdumpster_script_file =   apis_folder_path + "API-dnsdumpster.com/api.py"
 pwndb_script_file =         apis_folder_path + "pwndb/pwndb.py"
+harvester_script_file =     apis_folder_path + "theHarvester/theHarvester.py"
+
 # Gobuster
 gobuster_dictionary =       apis_folder_path + "bitquark-subdomains-top100000.txt"
 gobuster_threads =          50
