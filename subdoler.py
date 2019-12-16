@@ -116,7 +116,6 @@ def analyze(output_dir, ranges, ranges_info, domains_file):
 		if os.path.isfile(f_name):
 			file_values = open(f_name).read().splitlines()
 			print("Calculating data from "+str(len(file_values))+" entries in "+f_name)
-			#analyze_values(f, file_values, writer, worksheet, row, col)
 			bar = progressbar.ProgressBar(maxval=len(file_values), widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
 			bar.start()
 			bar_counter = 0
@@ -134,7 +133,6 @@ def analyze(output_dir, ranges, ranges_info, domains_file):
 						else:
 							calculated_ips =  subprocess.Popen(["dig", "+short", v], stdout=subprocess.PIPE, encoding='utf8').communicate(timeout = dig_timeout)[0].replace("\n"," ").split(" ")
 					except Exception as e:
-						#print(str(e))
 						calculated_ips = ['']
 					if calculated_ips == ['']:
 						data_array = [v, f['code'], '', '', '']
@@ -157,7 +155,6 @@ def analyze(output_dir, ranges, ranges_info, domains_file):
 									else:
 										reverse_dns = subprocess.Popen(["dig", "+short", calculated_ip], stdout=subprocess.PIPE, encoding='utf8').communicate(timeout = dig_timeout)[0].replace("\n"," ") if calculated_ip != "" else ""		
 								except Exception as e:
-									#print(str(e))
 									reverse_dns = ''
 								ip_in_range = ""
 								if calculated_ip is not '' and ranges is not None:

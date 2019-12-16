@@ -48,7 +48,7 @@ It calculates the IP ranges of the companies in IPv4info, extracts the domains i
 python subdoler.py -c COMPANIES_FILE -o OUTPUT_PREFIX -t {tmux|gnome-terminal}
 ```
 
-First the IP ranges of each company are calculated:
+First, the IP ranges of each company are calculated:
 
 ![image](images/image0.jpg)
 
@@ -56,11 +56,11 @@ Second, the domains in these IP ranges:
 
 ![image](images/image1.jpg)
 
-Third, it calculates the subdomains of the domains in a Tmux session:
+Third, the subdomains of these domains are calculated using a Tmux session:
 
 ![image](images/image2.jpg)
 
-The program will wait until the user clicks the 'Enter' button:
+Then, the program will wait until the user clicks the 'Enter' button:
 
 ![image](images/image2_5.jpg)
 
@@ -68,21 +68,21 @@ The program will wait until the user clicks the 'Enter' button:
 ![image](images/image2_8.jpg)
 
 
-When the subdomains calculation finishes, the unique subdomains are listed and the output is stored in files:
+Finally, the unique subdomains are listed and the output is stored in different files:
 
 ![image](images/image3.jpg)
 
-Four files are created in the specified output directory:
+Five files are created in the specified output directory:
 
-- The CSV file (*prefix-source.csv*) contains the subdomains with the program which discovered them, the reverse lookup IP and which range it is part of
+- The CSV file (*subdomain_by_source.csv*) contains the subdomains with the program which discovered them, the reverse lookup IP and which range it is part of
 
-- The second CSV file (*prefix-ranges.csv*) contains information about the ranges
+- The second CSV file (*ranges_information.csv*) contains information about the ranges
 
-- The subdomains TXT files (*prefix-unique.txt*) contains a list of unique subdomains.
+- The subdomains TXT files (*unique_subdomains.txt*) contains a list of unique subdomains.
 
-- The leaks TXT file (*prefix-leaked.txt*) contains the leaked email accounts and credentials. 
+- The leaks TXT file (*leaked_information.txt*) contains the leaked email accounts and credentials. 
 
-- The XLSX file (*prefix.xlsx*) contains the same information in a single file.
+- The XLSX file (*results.xlsx*) contains the same information in a single file.
 
 
 ![image](images/image3_5.jpg)
