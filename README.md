@@ -18,14 +18,11 @@ Set the value to *True* in the *config.py* file to use these tools:
 
 - [Gobuster](https://github.com/OJ/gobuster) - Bruteforce mode with a custom dictionary (using one from this [repo](https://github.com/danielmiessler/SecLists) by default)
 
-- [IPv4info](http://ipv4info.com/tools/api/) - Using the API (Token needed)
-
 - [Findsubdomains](https://findsubdomains.com/) - Using an API (Token needed)
 
 - [DNSDumpster](https://github.com/PaulSec/API-dnsdumpster.com) - Using a Python API
 
 - [FDNS](https://opendata.rapid7.com/sonar.fdns_v2/) - You must [download the file from here](https://opendata.rapid7.com/sonar.fdns_v2/) and set its path in *config.py*
-
 
 
 There are extra options to enumerate leaked information:

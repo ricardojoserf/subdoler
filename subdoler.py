@@ -98,7 +98,6 @@ def analyze(output_dir, ranges, ranges_info, domains_file):
 	output_dir = output_dir + "/" if not output_dir.endswith("/") else output_dir
 	if not os.path.exists(output_dir):
 		os.makedirs(output_dir)	
-		os.chmod(path, 0o444)
 	workbook = xlsxwriter.Workbook(output_dir+"results.xlsx")
 	# Subdomains by source
 	worksheet = workbook.add_worksheet("Subdomain by source")
