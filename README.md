@@ -7,12 +7,15 @@ Subdomain lister from a list of companies names, IP ranges or domains.
 
 ```
 git clone https://github.com/ricardojoserf/subdoler
-cd subdoler/install/ && sh install.sh && cd ..
+cd subdoler/install/ 
+sh install.sh 
+pip3 install -r requirements.txt
+pip install -r requirements.txt
+cd ..
 ```
 
 ## Subdomains enumeration settings
 
-Set the value to *True* in the *config.py* file to use these tools:
 
 - [Amass](https://github.com/OWASP/Amass) - Passive scan mode
 
@@ -31,35 +34,45 @@ There are extra options to enumerate leaked information:
 
 - [PwnDB](https://github.com/davidtavarez/pwndb): Search leaked credentials (the service *tor* gets started)
 
+NOTE: Set the value to "True" in the config.py file to use these tools:
+
+
 ----------------------------------------------------------
 
 
-## From Companies name
+## Subdomains from Companies list
 
-It calculates the IP ranges of the companies in IPv4info and extracts the domains in these IPs. You can use a tmux session or let the program open many terminal windows: 
+It calculates the IP ranges of the companies in IPv4info, extracts the domains in these IPs and then the subdomains: 
 
 ```
 python subdoler.py -c COMPANIES_FILE -o OUTPUT_PREFIX -t {tmux|gnome-terminal}
 ```
 
+First the IP ranges of each company are calculated:
+
 ![image](images/image0.jpg)
 
+Second, the domains in these IP ranges:
 
-Then, it creates a Tmux session which calculates the subdomains of the calculated domains and subdomains:
+![image](images/image1.jpg)
+
+Third, it calculates the subdomains of the domains in a Tmux session:
 
 ![image](images/image2.jpg)
-
 
 The program will wait until the user clicks the 'Enter' button:
 
 ![image](images/image2_5.jpg)
 
 
+![image](images/image2_8.jpg)
+
+
 When the subdomains calculation finishes, the unique subdomains are listed and the output is stored in files:
 
 ![image](images/image3.jpg)
 
-Four files are created:
+Four files are created in the specified output directory:
 
 - The CSV file (*prefix-source.csv*) contains the subdomains with the program which discovered them, the reverse lookup IP and which range it is part of
 
@@ -69,19 +82,17 @@ Four files are created:
 
 - The leaks TXT file (*prefix-leaked.txt*) contains the leaked email accounts and credentials. 
 
-- The XLSX file (*prefix.xlsx*) contains the same information in different sheets.
+- The XLSX file (*prefix.xlsx*) contains the same information in a single file.
 
 
 ![image](images/image3_5.jpg)
 
 ![image](images/image5.jpg)
 
-![image](images/image6.jpg)
-
 ![image](images/image6_5.jpg)
 
 
-## From IP ranges
+## Subdomains from IP ranges
 
 
 It skips the step of calculatig the ranges of the companies, working similarly but with the IP ranges directly:
@@ -93,7 +104,7 @@ python subdoler.py  -r RANGES_FILE -o OUTPUT_PREFIX -t {tmux|gnome-terminal}
 ![image](images/image7.jpg)
 
 
-## From Domains list
+## Subdomains from Domains list
 
 
 It skips the step of calculatig the ranges of the companies and the domains in IP ranges, working similarly but with the domains directly:
@@ -108,7 +119,7 @@ python subdoler.py -d DOMAINS_FILE -o OUTPUT_PREFIX -t {tmux|gnome-terminal}
 ----------------------------------------------------------
 
 
-## Domains from Companies name
+## Domains from Companies list
 
 Using *range_domains.py* instead of *subdoler.py*, you can skip the final step of calculating the subdomains, calculating just the IP ranges of the companies and the domains in them:
 

@@ -19,15 +19,11 @@ def main():
   domains = open(args.domains_file).read().splitlines()
   for d in domains:
     res = DNSDumpsterAPI(True).search(d)
-    if len(res) > 1:
-      try:
+    if len(res) > 1:      
         for entry in res['dns_records']['host']:
-              if entry['reverse_dns']:
-                val = ("{domain}".format(**entry))
-                res_file.write(val+"\n")
-      except:
-        pass
-
+              val = entry['domain']
+              print("%s" % val)
+              res_file.write(val+"\n")
 
 main()
 

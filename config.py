@@ -2,7 +2,7 @@ import os
 
 # Subdomains enumeration options 
 amass_active                = True
-gobuster_active             = False
+gobuster_active             = True
 findsubdomain_active        = False
 # Get the token in https://spyse.com/account/user
 findsubdomain_token         = "-"
@@ -11,8 +11,8 @@ ipv4info_token              = "-"
 dnsdumpster_active          = True
 fdns_active                 = False
 # Leaks
-theharvester_active         = False
-pwndb_active                = False
+theharvester_active         = True
+pwndb_active                = True
 
 # Temp files
 tmp_folder =                "/tmp/"
@@ -42,7 +42,7 @@ gobuster_threads =          50
 # FDNS
 fdns_file =                 "/media/root/Seagate Expansion Drive/fdns.json.gz"
 #tmux
-tmuxp_yaml_file =           tmp_folder + "subolder_temp.yaml"
+tmuxp_yaml_file =           tmp_folder + "subdoler_temp.yaml"
 #dig
 dig_timeout     =           5
 dig_threads     =           3

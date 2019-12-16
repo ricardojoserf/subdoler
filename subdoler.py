@@ -269,7 +269,11 @@ def main():
 	if domains_file is None:
 		if os.path.isfile(temp_domains_file):
 			os.remove(temp_domains_file)
-		domains_file, ranges, ranges_info = range_domains.range_extractor(ranges_file, companies_file, temp_domains_file)
+		try:
+			domains_file, ranges, ranges_info = range_domains.range_extractor(ranges_file, companies_file, temp_domains_file)
+		except:
+			print("There was an error, maybe too many connections to IPv4info")
+			sys.exit(1)
 	commands = create_commands(domains_file)
 	exec_commands(commands, type_)
 	input("\n"+"Press 'Enter' to continue when everything has finished..."+"\n")
