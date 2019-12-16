@@ -15,14 +15,12 @@ git clone https://github.com/laramies/theHarvester ../APIs/theHarvester
 cp ../APIs/dnsdumpster_api.py ../APIs/API-dnsdumpster.com/api.py
 
 
-pip install -r requirements.txt
 pip install dnsdumpster
 pip install tmuxp
 pip install --user tmuxp
 pip install xlsxwriter
 pip install progressbar
 
-pip3 install -r requirements.txt
 pip3 install dnsdumpster
 pip3 install tmuxp
 pip3 install --user tmuxp

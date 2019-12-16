@@ -5,6 +5,7 @@ APIs/API-dnsdumpster.com/*
 APIs/*.txt
 APIs/*.csv
 APIs/pwndb/*
+APIs/theHarvester/*
 *.csv
 
 # Byte-compiled / optimized / DLL files

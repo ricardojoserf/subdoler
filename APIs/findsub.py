@@ -13,10 +13,10 @@ def get_args():
   return my_args
 
 
-def print_rec(records):
+def print_rec(records, res):
 	for r in records:
 		val = r["domain"]
-		print(val)
+		print("- %s"%(r["domain"]))
 		res.write(val+"\n")
 
 
@@ -24,13 +24,6 @@ def req_page(domain, api_token, page=1):
 	response = requests.get("https://api.spyse.com/v1/subdomains?domain="+domain+"&api_token="+api_token+"&page="+page)
 	json_data = json.loads(response.text)
 	return json_data
-
-
-def subd_analisis(subdomains_count):
-	print("\n"*3 + "Subdominios por dominio" + "\n"*3)
-	for key, value in sorted(subdomains_count.items(), key=lambda x: int(x[1])):
-		if int(value) > 1:
-			print("%s: %s" % (key, value))
 
 
 def main():
@@ -48,9 +41,9 @@ def main():
 		print(val)
 		res.write(val+"\n")
 		while done is not True:
-			data = req_page(d, api_token, str(page))
 			try:
-				print_rec(data["records"])
+				data = req_page(d, api_token, str(page))
+				print_rec(data["records"], res)
 				subdomains_count[d]=data["count"]
 				page += 1
 				if data["count"] == 0 or data["count"] % 30 != 0:
@@ -59,7 +52,6 @@ def main():
 				done = True
 				pass
 	res.close()
-	subd_analisis(subdomains_count)
 
 
 main()
