@@ -34,7 +34,7 @@ There are extra options to enumerate leaked information:
 
 - [PwnDB](https://github.com/davidtavarez/pwndb): Search leaked credentials (the service *tor* gets started)
 
-NOTE: Set the value to "True" in the config.py file to use these tools:
+NOTE: Set the value to "True" in the config.py file to use these tools
 
 
 ----------------------------------------------------------
@@ -72,13 +72,11 @@ Finally, the unique subdomains are listed and the output is stored in different 
 
 ![image](images/image3.jpg)
 
-Five files are created in the specified output directory:
+Different files are created in the specified output directory:
 
 - The CSV file (*subdomain_by_source.csv*) contains the subdomains with the program which discovered them, the reverse lookup IP and which range it is part of
 
 - The second CSV file (*ranges_information.csv*) contains information about the ranges
-
-- The subdomains TXT files (*unique_subdomains.txt*) contains a list of unique subdomains.
 
 - The leaks TXT file (*leaked_information.txt*) contains the leaked email accounts and credentials. 
 

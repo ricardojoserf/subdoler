@@ -38,7 +38,7 @@ harvester_script_file =     apis_folder_path + "theHarvester/theHarvester.py"
 
 # Gobuster
 gobuster_dictionary =       apis_folder_path + "bitquark-subdomains-top100000.txt"
-gobuster_threads =          50
+gobuster_threads =          10
 # FDNS
 fdns_file =                 "/media/root/Seagate Expansion Drive/fdns.json.gz"
 #tmux

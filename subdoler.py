@@ -12,7 +12,7 @@ import six
 import multiprocessing, time
 import progressbar
 
-unique_subdomains = []
+unique_subdomains = {}
 
 def get_args():
 	parser = argparse.ArgumentParser()
@@ -116,75 +116,70 @@ def analyze(output_dir, ranges, ranges_info, domains_file):
 		if os.path.isfile(f_name):
 			file_values = open(f_name).read().splitlines()
 			print("Calculating data from "+str(len(file_values))+" entries in "+f_name)
-			bar = progressbar.ProgressBar(maxval=len(file_values), widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
-			bar.start()
-			bar_counter = 0
 			for v in file_values:
-				bar_counter += 1
-				bar.update(bar_counter)
 				if len(v) > 2:
 					if f['name'] == 'Gobuster':
 						v = v.split(" ")[2]
-					if v not in unique_subdomains:
-						unique_subdomains.append(v)
+					source_ = f['code']
+					if v not in unique_subdomains.keys():
+						unique_subdomains[v] = source_
+					elif source_ not in unique_subdomains[v]:
+						unique_subdomains[v] += ", " + source_
+					else:
+						pass
+	print("Calculating data from "+str(len(unique_subdomains))+" total entries")
+	bar = progressbar.ProgressBar(maxval=len(unique_subdomains), widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+	bar.start()
+	bar_counter = 0
+	for subdomain in unique_subdomains.keys():
+		bar_counter += 1
+		bar.update(bar_counter)
+		try:
+			if six.PY2:
+				calculated_ips =  subprocess.Popen(["dig", "+short", subdomain], stdout=subprocess.PIPE).communicate(timeout = dig_timeout)[0].replace("\n"," ").split(" ")
+			else:
+				calculated_ips =  subprocess.Popen(["dig", "+short", subdomain], stdout=subprocess.PIPE, encoding='utf8').communicate(timeout = dig_timeout)[0].replace("\n"," ").split(" ")
+		except Exception as e:
+			calculated_ips = ['']
+		if calculated_ips == ['']:
+			data_array = [subdomain, unique_subdomains[subdomain], '', '', '']
+			writer.writerow(data_array)
+			for i in data_array:
+				worksheet.write(row, col, i)
+				col += 1
+			col = 0
+			row += 1
+		else:
+			for calculated_ip in calculated_ips:
+				try:
+					if calculated_ip == '' and len(calculated_ips) >= 2:
+						break
+					if calculated_ip == ";;":
+						break
 					try:
 						if six.PY2:
-							calculated_ips =  subprocess.Popen(["dig", "+short", v], stdout=subprocess.PIPE).communicate(timeout = dig_timeout)[0].replace("\n"," ").split(" ")
+							reverse_dns = subprocess.Popen(["dig", "+short", calculated_ip], stdout=subprocess.PIPE).communicate(timeout = dig_timeout)[0].replace("\n"," ") if calculated_ip != "" else ""
 						else:
-							calculated_ips =  subprocess.Popen(["dig", "+short", v], stdout=subprocess.PIPE, encoding='utf8').communicate(timeout = dig_timeout)[0].replace("\n"," ").split(" ")
+							reverse_dns = subprocess.Popen(["dig", "+short", calculated_ip], stdout=subprocess.PIPE, encoding='utf8').communicate(timeout = dig_timeout)[0].replace("\n"," ") if calculated_ip != "" else ""		
 					except Exception as e:
-						calculated_ips = ['']
-					if calculated_ips == ['']:
-						data_array = [v, f['code'], '', '', '']
-						writer.writerow(data_array)
-						for i in data_array:
-							worksheet.write(row, col, i)
-							col += 1
-						col = 0
-						row += 1
-					else:
-						for calculated_ip in calculated_ips:
-							try:
-								if calculated_ip == '' and len(calculated_ips) >= 2:
-									break
-								if calculated_ip == ";;":
-									break
-								try:
-									if six.PY2:
-										reverse_dns = subprocess.Popen(["dig", "+short", calculated_ip], stdout=subprocess.PIPE).communicate(timeout = dig_timeout)[0].replace("\n"," ") if calculated_ip != "" else ""
-									else:
-										reverse_dns = subprocess.Popen(["dig", "+short", calculated_ip], stdout=subprocess.PIPE, encoding='utf8').communicate(timeout = dig_timeout)[0].replace("\n"," ") if calculated_ip != "" else ""		
-								except Exception as e:
-									reverse_dns = ''
-								ip_in_range = ""
-								if calculated_ip is not '' and ranges is not None:
-									for r in ranges:
-										if utils.ip_in_prefix(calculated_ip, r) is True:
-											ip_in_range = r
-											break
-								data_array = [v, f['code'], calculated_ip, reverse_dns, ip_in_range]
-								writer.writerow(data_array)
-								for i in data_array:
-									worksheet.write(row, col, i)
-									col += 1
-								col = 0
-								row += 1
-							except:
-								pass
-			bar.finish()
+						reverse_dns = ''
+					ip_in_range = ""
+					if calculated_ip is not '' and ranges is not None:
+						for r in ranges:
+							if utils.ip_in_prefix(calculated_ip, r) is True:
+								ip_in_range = r
+								break
+					data_array = [v, unique_subdomains[subdomain], calculated_ip, reverse_dns, ip_in_range]
+					writer.writerow(data_array)
+					for i in data_array:
+						worksheet.write(row, col, i)
+						col += 1
+					col = 0
+					row += 1
+				except:
+					pass
+	bar.finish()
 
-	# Unique subdomains
-	csv_file = open(output_dir+"unique_subdomains.txt","w+") 
-	writer = csv.writer(csv_file)
-	print("\n"+"-"*25+"\n"+"Unique subdomains: "+str(len(unique_subdomains))+"\n"+"-"*25)
-	worksheet = workbook.add_worksheet("Unique subdomains")
-	row = 0
-	col = 0
-	for u in unique_subdomains:
-		print("-"+u)
-		worksheet.write(row, col, u)
-		writer.writerow([u])
-		row += 1
 	# Leaked information
 	csv_file = open(output_dir+"leaked_information.txt","w+") 
 	writer = csv.writer(csv_file)
