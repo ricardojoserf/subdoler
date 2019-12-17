@@ -45,7 +45,7 @@ NOTE: Set the value to "True" in the config.py file to use these tools
 It calculates the IP ranges of the companies in IPv4info, extracts the domains in these IPs and then the subdomains: 
 
 ```
-python subdoler.py -c COMPANIES_FILE -o OUTPUT_PREFIX -t {tmux|gnome-terminal}
+python subdoler.py -c COMPANIES_FILE -o OUTPUT_DIRECTORY 
 ```
 
 First, the IP ranges of each company are calculated:
@@ -96,7 +96,7 @@ Different files are created in the specified output directory:
 It skips the step of calculatig the ranges of the companies, working similarly but with the IP ranges directly:
 
 ```
-python subdoler.py  -r RANGES_FILE -o OUTPUT_PREFIX -t {tmux|gnome-terminal}
+python subdoler.py -r RANGES_FILE -o OUTPUT_DIRECTORY 
 ```
 
 ![image](images/image7.jpg)
@@ -108,37 +108,31 @@ python subdoler.py  -r RANGES_FILE -o OUTPUT_PREFIX -t {tmux|gnome-terminal}
 It skips the step of calculatig the ranges of the companies and the domains in IP ranges, working similarly but with the domains directly:
 
 ```
-python subdoler.py -d DOMAINS_FILE -o OUTPUT_PREFIX -t {tmux|gnome-terminal}
+python subdoler.py -d DOMAINS_FILE -o OUTPUT_DIRECTORY 
 ```
 
 ![image](images/image8.jpg)
 
 
-----------------------------------------------------------
+## Only ranges and domains from Companies list
 
-
-## Domains from Companies list
-
-Using *range_domains.py* instead of *subdoler.py*, you can skip the final step of calculating the subdomains, calculating just the IP ranges of the companies and the domains in them:
+Using the option **-ns** the step of calculating the subdomains is skipped, calculating just the IP ranges of the companies and the domains in them:
 
 ```
-python range_domains.py -c COMPANIES_FILE -o OUTPUT_FILE
+python subdoler.py -ns -c COMPANIES_FILE -o OUTPUT_DIRECTORY
 ```
 
 ![image](images/image9.jpg)
 
-
-These are stored in the output file:
-
 ![image](images/image10.jpg)
 
 
-## Domains from IP ranges 
-
-Also using *range_domains.py* you can just get domains in IP ranges, skipping the step of calculating the IP ranges from the companies name:
+## Only domains from IP ranges 
 
 ```
-python range_domains.py -r RANGES_FILE -o OUTPUT_FILE
+python subdoler.py -ns -r RANGES_FILE -o OUTPUT_DIRECTORY 
 ```
 
 ![image](images/image11.jpg)
+
+![image](images/image12.jpg)

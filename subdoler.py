@@ -20,6 +20,7 @@ def get_args():
 	parser.add_argument('-c', '--companies_file', required=False, default=None, action='store', help='File with ranges to analyze')
 	parser.add_argument('-o', '--output_directory', required=False, default="result.csv", action='store', help='Csv file')
 	parser.add_argument('-t', '--type', required=False, default="tmux", action='store', help='Type of output (tmux/gnome-terminal)')
+	parser.add_argument('-ns', '--no_subdomains', required=False, action='store_true', help='Do not list subdomains, just ranges and domains')
 	my_args = parser.parse_args()
 	return my_args
 
@@ -230,26 +231,44 @@ def get_range_info(output_dir, workbook, ranges_info):
 		row += 1
 		for r in ranges_info:
 			file_values = [r['organization'], r['block_name'], r['first_ip'], r['last_ip'], r['range_size'], r['asn'], r['country']]
-			writer.writerow(file_values)
-			for val in file_values:
-				worksheet.write(row, col, val)
-				col += 1
-			col = 0
-			row += 1
+			if r['organization'] != "Organization":
+				writer.writerow(file_values)
+				for val in file_values:
+					worksheet.write(row, col, val)
+					col += 1
+				col = 0
+				row += 1
 
 
-def analyze(output_dir, ranges, ranges_info, domains_file):
+def get_domains(output_dir, workbook, domains_file):
+	row = 0
+	col = 0
+	domains_ = open(domains_file).read().splitlines()
+	csv_file = open(output_dir+"main_domains.txt","w+")
+	writer = csv.writer(csv_file)
+	worksheet = workbook.add_worksheet("Main domains")
+	for d in domains_:
+		print("- %s" % d)
+		worksheet.write(row, col, d)
+		writer.writerow([d])
+		row += 1
+
+
+def analyze(output_dir, ranges, ranges_info, domains_file, dont_list_subdomains):
 	res_files = [{'name': domains_file,'code':'Dig (IP range)'},{'name': amass_output_file,'code':'Amass'},{'name': ipv4info_output_file,'code':'IPv4info API'},{'name': findsubdomain_output_file,'code':'Findsubdomain API'},{'name': dnsdumpster_output_file,'code':'DNSDumpster API'},{'name': gobuster_output_file,'code':'Gobuster'},{'name': fdns_output_file,'code':'FDNS'}]
 	output_dir = output_dir + "/" if not output_dir.endswith("/") else output_dir
 	if not os.path.exists(output_dir):
 		os.makedirs(output_dir)	
 	workbook = xlsxwriter.Workbook(output_dir+"results.xlsx")
-	# Subdomains by source
-	get_subdomain_info(output_dir, res_files, workbook, ranges)
-	# Unique subdomains
-	get_unique_subdomains(output_dir, workbook)
-	# Leaked information
-	get_leaked_information(output_dir, workbook)
+	# Main domains
+	get_domains(output_dir, workbook, domains_file)
+	if not dont_list_subdomains:
+		# Subdomains by source
+		get_subdomain_info(output_dir, res_files, workbook, ranges)
+		# Unique subdomains
+		get_unique_subdomains(output_dir, workbook)
+		# Leaked information
+		get_leaked_information(output_dir, workbook)
 	# Range information
 	get_range_info(output_dir, workbook, ranges_info)
 	workbook.close()
@@ -286,23 +305,27 @@ def main():
 	type_ = args.type
 	ranges_file = args.ranges_file
 	companies_file = args.companies_file
+	dont_list_subdomains = args.no_subdomains
 	print_banner()
 	if domains_file is None and ranges_file is None and companies_file is None:
 		print_usage()
 	ranges = None
 	ranges_info = None
 	if domains_file is None:
-		if os.path.isfile(temp_domains_file):
-			os.remove(temp_domains_file)
-		try:
-			domains_file, ranges, ranges_info = range_domains.range_extractor(ranges_file, companies_file, temp_domains_file)
-		except:
-			print("There was an error, maybe too many connections to IPv4info")
-			sys.exit(1)
-	commands = create_commands(domains_file)
-	exec_commands(commands, type_)
-	input("\n"+"Press 'Enter' to continue when everything has finished..."+"\n")
-	analyze(output_directory, ranges, ranges_info, domains_file)
+		'''if os.path.isfile(temp_domains_file):
+			os.remove(temp_domains_file)'''
+		#try:
+		domains_file, ranges, ranges_info = range_domains.range_extractor(ranges_file, companies_file, temp_domains_file)
+		
+		#analyze(output_directory, ranges, ranges_info, domains_file, dont_list_subdomains)
+		#except:
+		#	print("There was an error, maybe too many connections to IPv4info")
+		#	sys.exit(1)
+	if not dont_list_subdomains:
+		commands = create_commands(domains_file)
+		exec_commands(commands, type_)
+		input("\n"+"Press 'Enter' to continue when everything has finished..."+"\n")
+	analyze(output_directory, ranges, ranges_info, domains_file, dont_list_subdomains)
 
 
 if __name__== "__main__":
