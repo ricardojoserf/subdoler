@@ -2,7 +2,7 @@ import os
 
 # Subdomains enumeration options 
 amass_active                = True
-gobuster_active             = True
+gobuster_active             = False
 findsubdomain_active        = False
 # Get the token in https://spyse.com/account/user
 findsubdomain_token         = "-"
@@ -11,8 +11,8 @@ ipv4info_token              = "-"
 dnsdumpster_active          = True
 fdns_active                 = False
 # Leaks
-theharvester_active         = True
-pwndb_active                = True
+theharvester_active         = False
+pwndb_active                = False
 
 # Temp files
 tmp_folder =                "/tmp/"

@@ -1,15 +1,14 @@
 import sys
 import os
+from config import *
+import range_domains
 import subprocess
 import argparse
 import xlsxwriter
-import range_domains
 import csv
-from config import *
 import utils
-from six.moves import input
 import six
-import multiprocessing, time
+from six.moves import input
 import progressbar
 
 unique_subdomains = {}
@@ -93,16 +92,10 @@ def exec_commands(commands, type_):
 				os.system('gnome-terminal -- bash -c "echo; echo {0}; echo; {1}; exec bash" 2>/dev/null'.format(i["title"],i["command"]))
 
 
-def analyze(output_dir, ranges, ranges_info, domains_file):
-	res_files = [{'name': domains_file,'code':'Dig (IP range)'},{'name': amass_output_file,'code':'Amass'},{'name': ipv4info_output_file,'code':'IPv4info API'},{'name': findsubdomain_output_file,'code':'Findsubdomain API'},{'name': dnsdumpster_output_file,'code':'DNSDumpster API'},{'name': gobuster_output_file,'code':'Gobuster'},{'name': fdns_output_file,'code':'FDNS'}]
-	output_dir = output_dir + "/" if not output_dir.endswith("/") else output_dir
-	if not os.path.exists(output_dir):
-		os.makedirs(output_dir)	
-	workbook = xlsxwriter.Workbook(output_dir+"results.xlsx")
-	# Subdomains by source
-	worksheet = workbook.add_worksheet("Subdomain by source")
+def get_subdomain_info(output_dir, res_files, workbook, ranges):
 	row = 0
 	col = 0
+	worksheet = workbook.add_worksheet("Subdomain by source")
 	for i in ["Subdomain", "Source", "IP", "Reversed IP", "IP in range"]:
 		worksheet.write(row, col, i)
 		col += 1
@@ -180,13 +173,28 @@ def analyze(output_dir, ranges, ranges_info, domains_file):
 					pass
 	bar.finish()
 
-	# Leaked information
-	csv_file = open(output_dir+"leaked_information.txt","w+") 
+
+def get_unique_subdomains(output_dir, workbook):
+	row = 0
+	col = 0
+	csv_file = open(output_dir+"unique_subdomains.txt","w+") 
 	writer = csv.writer(csv_file)
-	worksheet = workbook.add_worksheet("Leaked information")
+	print("\n"+"-"*25+"\n"+"Unique subdomains: "+str(len(unique_subdomains))+"\n"+"-"*25)
+	worksheet = workbook.add_worksheet("Unique subdomains")
+	for u in unique_subdomains:
+		print("- %s" % u)
+		worksheet.write(row, col, u)
+		writer.writerow([u])
+		row += 1
+
+
+def get_leaked_information(output_dir, workbook):
 	row = 0
 	col = 0
 	leaked = []
+	csv_file = open(output_dir+"leaked_information.txt","w+") 
+	writer = csv.writer(csv_file)
+	worksheet = workbook.add_worksheet("Leaked information")
 	if os.path.isfile(harvester_output_file) or os.path.isfile(pwndb_output_file):
 		print("\n"+"-"*25+"\n"+"Leaked information"+"\n"+"-"*25)
 		if os.path.isfile(harvester_output_file):
@@ -200,17 +208,19 @@ def analyze(output_dir, ranges, ranges_info, domains_file):
 			file_values = open(pwndb_output_file).read().splitlines()
 			leaked.extend(file_values)
 	for l in leaked:
-		if "cmartorella" in leaked:
+		if "cmartorella" not in leaked:
 			worksheet.write(row, col, l)
 			writer.writerow([l])
 			row += 1
-	# Range information
+
+
+def get_range_info(output_dir, workbook, ranges_info):
 	if ranges_info is not None:
+		row = 0
+		col = 0
 		csv_file = open(output_dir+"ranges_information.csv","w+") 
 		writer = csv.writer(csv_file)
 		worksheet = workbook.add_worksheet("Ranges information")
-		row = 0
-		col = 0
 		heading = ["Organization", "Block name", "First IP", "Last IP", "Range size", "ASN", "Country"]
 		writer.writerow(heading)
 		for i in heading:
@@ -226,20 +236,29 @@ def analyze(output_dir, ranges, ranges_info, domains_file):
 				col += 1
 			col = 0
 			row += 1
-	##############################################################
+
+
+def analyze(output_dir, ranges, ranges_info, domains_file):
+	res_files = [{'name': domains_file,'code':'Dig (IP range)'},{'name': amass_output_file,'code':'Amass'},{'name': ipv4info_output_file,'code':'IPv4info API'},{'name': findsubdomain_output_file,'code':'Findsubdomain API'},{'name': dnsdumpster_output_file,'code':'DNSDumpster API'},{'name': gobuster_output_file,'code':'Gobuster'},{'name': fdns_output_file,'code':'FDNS'}]
+	output_dir = output_dir + "/" if not output_dir.endswith("/") else output_dir
+	if not os.path.exists(output_dir):
+		os.makedirs(output_dir)	
+	workbook = xlsxwriter.Workbook(output_dir+"results.xlsx")
+	# Subdomains by source
+	get_subdomain_info(output_dir, res_files, workbook, ranges)
+	# Unique subdomains
+	get_unique_subdomains(output_dir, workbook)
+	# Leaked information
+	get_leaked_information(output_dir, workbook)
+	# Range information
+	get_range_info(output_dir, workbook, ranges_info)
 	workbook.close()
 	print ("\n"+"Cleaning temporary files...")
 	os.system("touch /tmp/dummy_temp; rm /tmp/*_temp*;")
 	print("Done! Output saved in "+output_dir)
 
 
-def main():
-	args = get_args()
-	domains_file = args.domains_file
-	output_directory = args.output_directory
-	type_ = args.type
-	ranges_file = args.ranges_file
-	companies_file = args.companies_file
+def print_banner():
 	print( "")
 	print( " .d8888b.           888           888          888")
 	print( "d88P  Y88b          888           888          888                  ")
@@ -252,10 +271,24 @@ def main():
 	print( "")
 	print( "      -  A (hopefully) less painful way to list subdomains -      ")
 	print( "")
+
+
+def print_usage():
+	print( "Error: Domains, ranges or company file is necessary")
+	print( "usage: subdoler.py [-h] [-d DOMAINS_FILE] [-r RANGES_FILE] [-c COMPANIES_FILE] [-o OUTPUT_DIRECTORY] [-t TYPE]")
+	sys.exit(1)
+
+
+def main():
+	args = get_args()
+	domains_file = args.domains_file
+	output_directory = args.output_directory
+	type_ = args.type
+	ranges_file = args.ranges_file
+	companies_file = args.companies_file
+	print_banner()
 	if domains_file is None and ranges_file is None and companies_file is None:
-		print( "Error: Domains, ranges or company file is necessary")
-		print( "usage: subdoler.py [-h] [-d DOMAINS_FILE] [-r RANGES_FILE] [-c COMPANIES_FILE] [-o OUTPUT_DIRECTORY] [-t TYPE]")
-		sys.exit(1)
+		print_usage()
 	ranges = None
 	ranges_info = None
 	if domains_file is None:
