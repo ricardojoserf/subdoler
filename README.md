@@ -74,20 +74,20 @@ Finally, the unique subdomains are listed and the output is stored in different 
 
 Different files are created in the specified output directory:
 
-- The CSV file (*subdomain_by_source.csv*) contains the subdomains with the program which discovered them, the reverse lookup IP and which range it is part of
+- **main_domains.txt**: It contains the domains (hostnames) from the IP ranges calculated.
 
-- The second CSV file (*ranges_information.csv*) contains information about the ranges
+- **subdomain_by_source.csv**: It contains the subdomains with the program which discovered them, the reverse lookup IP and which range it is part of
 
-- The leaks TXT file (*leaked_information.txt*) contains the leaked email accounts and credentials. 
+- **ranges_information.csv**: It contains information about the ranges
 
-- The XLSX file (*results.xlsx*) contains the same information in a single file.
+- **leaked_information.txt**: It contains the leaked email accounts and credentials. 
+
+- **results.xlsx**: It contains all the information in an Excel file with different sheets.
 
 
 ![image](images/image3_5.jpg)
 
 ![image](images/image5.jpg)
-
-![image](images/image6_5.jpg)
 
 
 ## Subdomains from IP ranges

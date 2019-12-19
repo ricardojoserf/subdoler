@@ -37,7 +37,6 @@ def create_commands(domains_file):
 	domains = open(domains_file).read().splitlines()
 	amass_cmd =         "amass enum --passive -d "+",".join(domains)+" -o "+amass_output_file + "; echo Finished"
 	findsubdomain_cmd = python_bin+" "+findsubdomain_script_file+" -f "+domains_file+" -a "+findsubdomain_token+" -o "+findsubdomain_output_file + "; echo Finished"
-	ipv4info_cmd =      python_bin+" "+ipv4info_script_file+" -f "+domains_file+" -a "+ipv4info_token+" -o "+ipv4info_output_file +"; echo Finished"
 	dnsdumpster_cmd =   python_bin+" "+dnsdumpster_script_file+" -f "+domains_file+" -o "+dnsdumpster_output_file +"; echo Finished"
 	fdns_cmd =          "zcat '"+fdns_file+"' | egrep '(" + "|\\.".join(domains) + ")' | cut -d ',' -f 2 | cut -d '\"' -f 4 | tee "+fdns_output_file
 	gobuster_cmd =      ""
@@ -59,8 +58,6 @@ def create_commands(domains_file):
 	commands.append({"title":"Amass - Passive Scan Mode", "command": amass_cmd, "active": amass_active})
 	if findsubdomain_token is not "" and findsubdomain_token is not "-":
 		commands.append({"title":"Findsubdomain - Subdomains", "command": findsubdomain_cmd, "active": findsubdomain_active})
-	if ipv4info_token is not "" and ipv4info_token is not "-":
-		commands.append({"title":"IPv4info - Subdomains", "command": ipv4info_cmd, "active": ipv4info_active})
 	commands.append({"title":"DNSDumpster - Subdomains", "command": dnsdumpster_cmd, "active": dnsdumpster_active})
 	commands.append({"title":"FDNS - Subdomain lister", "command": fdns_cmd, "active": fdns_active})
 	commands.append({"title":"Gobuster - Subdomain bruteforce", "command": gobuster_cmd, "active": gobuster_active})
@@ -256,7 +253,7 @@ def get_domains(output_dir, workbook, domains_file):
 
 
 def analyze(output_dir, ranges, ranges_info, domains_file, dont_list_subdomains):
-	res_files = [{'name': domains_file,'code':'Dig (IP range)'},{'name': amass_output_file,'code':'Amass'},{'name': ipv4info_output_file,'code':'IPv4info API'},{'name': findsubdomain_output_file,'code':'Findsubdomain API'},{'name': dnsdumpster_output_file,'code':'DNSDumpster API'},{'name': gobuster_output_file,'code':'Gobuster'},{'name': fdns_output_file,'code':'FDNS'}]
+	res_files = [{'name': domains_file,'code':'Dig (IP range)'},{'name': amass_output_file,'code':'Amass'},{'name': findsubdomain_output_file,'code':'Findsubdomain API'},{'name': dnsdumpster_output_file,'code':'DNSDumpster API'},{'name': gobuster_output_file,'code':'Gobuster'},{'name': fdns_output_file,'code':'FDNS'}]
 	output_dir = output_dir + "/" if not output_dir.endswith("/") else output_dir
 	if not os.path.exists(output_dir):
 		os.makedirs(output_dir)	
@@ -313,15 +310,11 @@ def main():
 	ranges = None
 	ranges_info = None
 	if domains_file is None:
-		'''if os.path.isfile(temp_domains_file):
-			os.remove(temp_domains_file)'''
-		#try:
-		domains_file, ranges, ranges_info = range_domains.range_extractor(ranges_file, companies_file, temp_domains_file)
-		
-		#analyze(output_directory, ranges, ranges_info, domains_file, dont_list_subdomains)
-		#except:
-		#	print("There was an error, maybe too many connections to IPv4info")
-		#	sys.exit(1)
+		try:
+			domains_file, ranges, ranges_info = range_domains.range_extractor(ranges_file, companies_file, temp_domains_file)
+		except:
+			print("There was an error, maybe too many connections to IPv4info")
+			sys.exit(1)
 	if not dont_list_subdomains:
 		commands = create_commands(domains_file)
 		exec_commands(commands, type_)
