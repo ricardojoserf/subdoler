@@ -102,9 +102,6 @@ def get_subdomain_info(output_dir, res_files, workbook, ranges):
 		col += 1
 	col = 0
 	row += 1
-	csv_file = open(output_dir+"subdomain_by_source.csv","w+") 
-	writer = csv.writer(csv_file)
-	writer.writerow(["Subdomain", "Source", "IP", "Reversed IP", "IP in range"])
 	for f in res_files:
 		f_name = f['name']
 		if os.path.isfile(f_name):
@@ -122,9 +119,13 @@ def get_subdomain_info(output_dir, res_files, workbook, ranges):
 					else:
 						pass
 	print("Calculating data from "+str(len(unique_subdomains))+" total entries")
+	csv_file = open(output_dir+"subdomain_by_source.csv","w+") 
+	writer = csv.writer(csv_file)
+	writer.writerow(["Subdomain", "Source", "IP", "Reversed IP", "IP in range"])
 	bar = progressbar.ProgressBar(maxval=len(unique_subdomains), widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
 	bar.start()
 	bar_counter = 0
+
 	for subdomain in unique_subdomains.keys():
 		bar_counter += 1
 		bar.update(bar_counter)
@@ -163,7 +164,7 @@ def get_subdomain_info(output_dir, res_files, workbook, ranges):
 							if utils.ip_in_prefix(calculated_ip, r) is True:
 								ip_in_range = r
 								break
-					data_array = [v, unique_subdomains[subdomain], calculated_ip, reverse_dns, ip_in_range]
+					data_array = [subdomain, unique_subdomains[subdomain], calculated_ip, reverse_dns, ip_in_range]
 					writer.writerow(data_array)
 					for i in data_array:
 						worksheet.write(row, col, i)
