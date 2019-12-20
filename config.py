@@ -1,5 +1,8 @@
 import os
 
+program_path =              os.getcwd() + "/"
+apis_folder_path =          program_path + "APIs/"
+
 # Subdomain Enumeration Setting
 ### Amass
 amass_active                = True
@@ -37,8 +40,6 @@ merged_output_file =        tmp_folder + "merged_temp"
 tmuxp_yaml_file =           tmp_folder + "subdoler_temp.yaml"
 
 # File paths
-program_path =              os.getcwd() + "/"
-apis_folder_path =          program_path + "APIs/"
 findsubdomain_script_file = apis_folder_path + "findsub.py"
 dnsdumpster_script_file =   apis_folder_path + "API-dnsdumpster.com/api.py"
 pwndb_script_file =         apis_folder_path + "pwndb/pwndb.py"

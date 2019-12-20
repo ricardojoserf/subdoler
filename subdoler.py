@@ -1,12 +1,11 @@
 import sys
 import os
+from APIs.utils import bin_path, ip_in_prefix, range_extractor
 from config import *
-import range_domains
 import subprocess
 import argparse
 import xlsxwriter
 import csv
-import utils
 import six
 from six.moves import input
 import progressbar
@@ -28,9 +27,9 @@ def get_args():
 def create_commands(domains_file):
 	python_bin = ""
 	if six.PY2:
-		python_bin = utils.bin_path("python2", "python")
+		python_bin = bin_path("python2", "python")
 	else:
-		python_bin = utils.bin_path("python3", "python")
+		python_bin = bin_path("python3", "python")
 	if not os.path.isfile(domains_file):
 		print("\n"+"No domains calculated. Exiting...")
 		sys.exit(1)
@@ -41,7 +40,7 @@ def create_commands(domains_file):
 	fdns_cmd =          "zcat '"+fdns_file+"' | egrep '(" + "|\\.".join(domains) + ")' | cut -d ',' -f 2 | cut -d '\"' -f 4 | tee "+fdns_output_file
 	gobuster_cmd =      ""
 	theharvester_cmd =  ""
-	theharvester_binary = utils.bin_path("theHarvester","theharvester")
+	theharvester_binary = bin_path("theHarvester","theharvester")
 	pwndb_cmd =         "service tor start; "
 	for d in range(0, len(domains)):
 		domain = domains[d]
@@ -158,7 +157,7 @@ def get_subdomain_info(output_dir, res_files, workbook, ranges):
 					ip_in_range = ""
 					if calculated_ip is not '' and ranges is not None:
 						for r in ranges:
-							if utils.ip_in_prefix(calculated_ip, r) is True:
+							if ip_in_prefix(calculated_ip, r) is True:
 								ip_in_range = r
 								break
 					data_array = [subdomain, unique_subdomains[subdomain], calculated_ip, reverse_dns, ip_in_range]
@@ -246,10 +245,11 @@ def get_domains(output_dir, workbook, domains_file):
 	writer = csv.writer(csv_file)
 	worksheet = workbook.add_worksheet("Main domains")
 	for d in domains_:
-		print("- %s" % d)
-		worksheet.write(row, col, d)
-		writer.writerow([d])
-		row += 1
+		if d != "":
+			print("- %s" % d)
+			worksheet.write(row, col, d)
+			writer.writerow([d])
+			row += 1
 
 
 def analyze(output_dir, ranges, ranges_info, domains_file, dont_list_subdomains):
@@ -311,9 +311,10 @@ def main():
 	ranges_info = None
 	if domains_file is None:
 		try:
-			domains_file, ranges, ranges_info = range_domains.range_extractor(ranges_file, companies_file, temp_domains_file)
-		except:
-			print("There was an error, maybe too many connections to IPv4info")
+			domains_file, ranges, ranges_info = range_extractor(ranges_file, companies_file, temp_domains_file)
+		except Exception as e:
+			print("There was an error, maybe too many connections to IPv4info?")
+			print(str(e))
 			sys.exit(1)
 	if not dont_list_subdomains:
 		commands = create_commands(domains_file)
