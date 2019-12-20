@@ -7,45 +7,41 @@ Subdomain lister from a list of companies names, IP ranges or domains.
 
 ```
 git clone https://github.com/ricardojoserf/subdoler
-cd subdoler/install/ 
-sh install.sh 
-pip3 install -r requirements.txt
-pip install -r requirements.txt
-cd ..
+cd subdoler
+python3 setup.py install install_dependencies clean
 ```
+
 
 ## Subdomains enumeration settings
 
+Set the value of these variables to "True" in the config.py file to use them. 
 
-- [Amass](https://github.com/OWASP/Amass) - Passive scan mode
+The options to enumerate subdomains are:
 
-- [Gobuster](https://github.com/OJ/gobuster) - Bruteforce mode with a custom dictionary (using one from this [repo](https://github.com/danielmiessler/SecLists) by default)
+- **amass_active** - Use [Amass](https://github.com/OWASP/Amass) in passive scan mode
 
-- [Findsubdomains](https://findsubdomains.com/) - Using an API (Token needed)
+- **gobuster_active** - Use [Gobuster](https://github.com/OJ/gobuster) in bruteforce mode with a custom dictionary (using [this](https://github.com/danielmiessler/SecLists) by default)
 
-- [DNSDumpster](https://github.com/PaulSec/API-dnsdumpster.com) - Using a Python API
+- **dnsdumpster_active** - Use the [DNSDumpster unofficial API](https://github.com/PaulSec/API-dnsdumpster.com)
 
-- [FDNS](https://opendata.rapid7.com/sonar.fdns_v2/) - You must [download the file from here](https://opendata.rapid7.com/sonar.fdns_v2/) and set its path in *config.py*
+- **findsubdomain_active** - Use the [Findsubdomains](https://findsubdomains.com/) API, token must be [provided](https://spyse.com/account/user)
 
+- **fdns_active** - Use [FDNS](https://opendata.rapid7.com/sonar.fdns_v2/) after [downloading the file](https://opendata.rapid7.com/sonar.fdns_v2/) and setting its path
 
-There are extra options to enumerate leaked information:
+The options to enumerate leaked information are:
 
-- [TheHarvester](https://github.com/laramies/theHarvester): Search leaked email addresses
+- **theharvester_active** - Use [theHarvester](https://github.com/laramies/theHarvester) to search leaked email addresses
 
-- [PwnDB](https://github.com/davidtavarez/pwndb): Search leaked credentials (the service *tor* gets started)
-
-NOTE: Set the value to "True" in the config.py file to use these tools
-
-
-----------------------------------------------------------
+- **pwndb_active** - Use [PwnDB](https://github.com/davidtavarez/pwndb) to search leaked credentials (the service *tor* needs to get started, it asks for root privileges)
 
 
-## Subdomains from Companies list
+
+## Subdomains from Companies list **(-c)**
 
 It calculates the IP ranges of the companies in IPv4info, extracts the domains in these IPs and then the subdomains: 
 
 ```
-python subdoler.py -c COMPANIES_FILE -o OUTPUT_DIRECTORY 
+python3 subdoler.py -c COMPANIES_FILE -o OUTPUT_DIRECTORY 
 ```
 
 First, the IP ranges of each company are calculated:
@@ -74,15 +70,15 @@ Finally, the unique subdomains are listed and the output is stored in different 
 
 Different files are created in the specified output directory:
 
-- **main_domains.txt**: It contains the domains (hostnames) from the IP ranges calculated.
+- **main_domains.txt**: It contains the domains (hostnames) from the IP ranges calculated
 
 - **subdomain_by_source.csv**: It contains the subdomains with the program which discovered them, the reverse lookup IP and which range it is part of
 
 - **ranges_information.csv**: It contains information about the ranges
 
-- **leaked_information.txt**: It contains the leaked email accounts and credentials. 
+- **leaked_information.txt**: It contains the leaked email accounts and credentials
 
-- **results.xlsx**: It contains all the information in an Excel file with different sheets.
+- **results.xlsx**: It contains all the information in an Excel file with different sheets
 
 
 ![image](images/image3_5.jpg)
@@ -90,36 +86,39 @@ Different files are created in the specified output directory:
 ![image](images/image5.jpg)
 
 
-## Subdomains from IP ranges
+
+## Subdomains from IP ranges **(-r)**
 
 
-It skips the step of calculatig the ranges of the companies, working similarly but with the IP ranges directly:
+It skips the step of calculatig the ranges of the companies, working with the IP ranges directly:
 
 ```
-python subdoler.py -r RANGES_FILE -o OUTPUT_DIRECTORY 
+python3 subdoler.py -r RANGES_FILE -o OUTPUT_DIRECTORY 
 ```
 
 ![image](images/image7.jpg)
 
 
-## Subdomains from Domains list
+
+## Subdomains from Domains list **(-d)**
 
 
-It skips the step of calculatig the ranges of the companies and the domains in IP ranges, working similarly but with the domains directly:
+It skips the steps of calculatig the ranges of the companies and the domains in the IP ranges, extracting the subdomains from the domains list directly:
 
 ```
-python subdoler.py -d DOMAINS_FILE -o OUTPUT_DIRECTORY 
+python3 subdoler.py -d DOMAINS_FILE -o OUTPUT_DIRECTORY 
 ```
 
 ![image](images/image8.jpg)
 
 
-## Only ranges and domains from Companies list
 
-Using the option **-ns** the step of calculating the subdomains is skipped, calculating just the IP ranges of the companies and the domains in them:
+## Only ranges and domains from Companies list (**-c** and **-ns**)
+
+Using the option **--no_subdomains** (-ns), the step of calculating the subdomains is skipped, calculating just the IP ranges of the companies and the domains in them:
 
 ```
-python subdoler.py -ns -c COMPANIES_FILE -o OUTPUT_DIRECTORY
+python3 subdoler.py -ns -c COMPANIES_FILE -o OUTPUT_DIRECTORY
 ```
 
 ![image](images/image9.jpg)
@@ -127,10 +126,11 @@ python subdoler.py -ns -c COMPANIES_FILE -o OUTPUT_DIRECTORY
 ![image](images/image10.jpg)
 
 
-## Only domains from IP ranges 
+
+## Only domains from IP ranges (**-r** and **-ns**)
 
 ```
-python subdoler.py -ns -r RANGES_FILE -o OUTPUT_DIRECTORY 
+python3 subdoler.py -ns -r RANGES_FILE -o OUTPUT_DIRECTORY 
 ```
 
 ![image](images/image11.jpg)
