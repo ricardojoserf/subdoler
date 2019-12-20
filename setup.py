@@ -37,7 +37,6 @@ class InstallDependencies(Command):
 setup(
   name='Subdoler',
   version='0.1.0',
-  scripts=['install/install.py'],
   description='A package to list subdomains',
   install_requires=[
     "tmuxp",
