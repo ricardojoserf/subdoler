@@ -11,6 +11,13 @@ cd subdoler
 python3 setup.py install install_dependencies clean
 ```
 
+Or:
+```
+git clone https://github.com/ricardojoserf/subdoler
+cd subdoler
+cd install && sh install.sh
+```
+
 
 ## Subdomains enumeration settings
 
@@ -23,8 +30,6 @@ The options to enumerate subdomains are:
 - **gobuster_active** - Use [Gobuster](https://github.com/OJ/gobuster) in bruteforce mode with a custom dictionary (using [this](https://github.com/danielmiessler/SecLists) by default)
 
 - **dnsdumpster_active** - Use the [DNSDumpster unofficial API](https://github.com/PaulSec/API-dnsdumpster.com)
-
-- **findsubdomain_active** - Use the [Findsubdomains](https://findsubdomains.com/) API, token must be [provided](https://spyse.com/account/user)
 
 - **fdns_active** - Use [FDNS](https://opendata.rapid7.com/sonar.fdns_v2/) after [downloading the file](https://opendata.rapid7.com/sonar.fdns_v2/) and setting its path
 
