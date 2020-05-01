@@ -1,6 +1,14 @@
 # Subdoler
 
-Subdomain lister from a list of companies names, IP ranges or domains. 
+Subdoler is a subdomain lister which calculates:
+
+- [IP ranges, domains and subdomains from a list of companies](#1)
+- [Domains and subdomains from a list of IP ranges](#2)
+- [Subdomains from a list of domains](#3)
+- [IP ranges and domains (no subdomains) from a list of companies](#4) 
+- [Domains (no subdomains) from a list of ranges](#5)
+
+It creates a TMUX session for calculating the subdomains. You can wait until the programs end or leave it and process it later [with option (--process)](#6).
 
 
 ## Installation
@@ -8,17 +16,13 @@ Subdomain lister from a list of companies names, IP ranges or domains.
 ```
 git clone https://github.com/ricardojoserf/subdoler
 cd subdoler
-python3 setup.py install install_dependencies clean
+cd install && sh install.sh
 ```
-
 Or:
 
 ```
-git clone https://github.com/ricardojoserf/subdoler
-cd subdoler
-cd install && sh install.sh
+python3 setup.py install install_dependencies clean
 ```
-
 
 ## Subdomains enumeration settings
 
@@ -42,7 +46,7 @@ Options to enumerate leaked information:
 
 
 
-## Subdomains from Companies list **(-c)**
+##  <a name="1"></a>IP ranges, domains and subdomains from a list of companies (**-c** or **-C**)
 
 It calculates the IP ranges of the companies in IPv4info, extracts the domains in these IPs and then the subdomains: 
 
@@ -108,10 +112,10 @@ Different files are created in the specified output directory:
 
 
 
-## Subdomains from IP ranges **(-r)**
+##  <a name="2"></a>Domains and subdomains from a list of IP ranges (**-r** or **-R**)
 
 
-It skips the step of calculatig the ranges of the companies, working with the IP ranges directly.
+It skips the step of calculating the ranges of the companies, working with the IP ranges directly.
 
 From a file:
 
@@ -134,10 +138,10 @@ python3 subdoler.py -R companyrange1,companyrange2 -o OUTPUT_DIRECTORY
 
 
 
-## Subdomains from Domains list **(-d)**
+## <a name="3"></a>Subdomains from a list of domains (**-d** or **-D**)
 
 
-It skips the steps of calculatig the ranges of the companies and the domains in the IP ranges, extracting the subdomains from the domains list directly:
+It skips the steps of calculating the ranges of the companies and the domains in the IP ranges, extracting the subdomains from the domains list directly:
 
 From a file:
 
@@ -159,7 +163,7 @@ python3 subdoler.py -D domain1,domain2,domain3 -o OUTPUT_DIRECTORY
 
 ----------------------------------------------
 
-## Only ranges and domains from Companies list (**-c** and **-ns**)
+## <a name="4"></a>IP ranges and domains (no subdomains) from a list of companies (**-c** or **-C** and **-ns**)
 
 Using the option **--no_subdomains** (-ns), the step of calculating the subdomains is skipped, calculating just the IP ranges of the companies and the domains in them:
 
@@ -173,7 +177,7 @@ python3 subdoler.py -ns -c COMPANIES_FILE -o OUTPUT_DIRECTORY
 
 
 
-## Only domains from IP ranges (**-r** and **-ns**)
+## <a name="5"></a>Domains (no subdomains) from a list of ranges (**-r** or **-R** and **-ns**)
 
 ```
 python3 subdoler.py -ns -r RANGES_FILE -o OUTPUT_DIRECTORY 
@@ -185,7 +189,7 @@ python3 subdoler.py -ns -r RANGES_FILE -o OUTPUT_DIRECTORY
 
 ----------------------------------------------
 
-## Only process files (**-p**)
+## <a name="6"></a>Process files (**-p**)
 
 ```
 python3 subdoler.py -o OUTPUT_DIRECTORY --process
