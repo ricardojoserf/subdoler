@@ -14,13 +14,18 @@ import os
 
 unique_subdomains = {}
 
+
 def get_args():
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-d', '--domains_file', required=False, default=None, action='store', help='File with domains to analyze')
+	parser.add_argument('-d', '--domains_file', required=False, default=None, action='store', help='File with a list of domains')
+	parser.add_argument('-D', '--domains_list', required=False, default=None, action='store', help='Comma separated list of domains')
+	parser.add_argument('-R', '--ranges_list', required=False, default=None, action='store', help='Comma separated list of ranges')
+	parser.add_argument('-C', '--companies_list', required=False, default=None, action='store', help='Comma separated list of companies')
 	parser.add_argument('-r', '--ranges_file', required=False, default=None, action='store', help='File with ranges to analyze')
 	parser.add_argument('-c', '--companies_file', required=False, default=None, action='store', help='File with ranges to analyze')
 	parser.add_argument('-o', '--output_directory', required=False, default="subdoler_res", action='store', help='Output directory')
 	parser.add_argument('-ns', '--no_subdomains', required=False, action='store_true', help='Do not list subdomains (just ranges and domains)')
+	parser.add_argument('-p', '--process', required=False, action='store_true', help='Process files in the folder')
 	my_args = parser.parse_args()
 	return my_args
 
@@ -82,7 +87,7 @@ def create_tmux_terminal(commands, output_directory):
 	os.system(tmux_gnome_cmd)
 
 
-def get_ip_list(ip_list, workbook):
+def write_ip_list(ip_list, workbook):
 	worksheet = workbook.add_worksheet("Unique IP addresses")
 	row = 0
 	col = 0
@@ -279,17 +284,19 @@ def get_domains(output_directory, workbook, domains_file):
 
 
 def analyze(output_directory, ranges, ranges_info, domains_file, dont_list_subdomains):
-	res_files = [{'name': output_directory+domains_file,'code':'Dig (IP range)'},{'name': output_directory+amass_output_file,'code':'Amass'},{'name': output_directory+dnsdumpster_output_file,'code':'DNSDumpster API'},{'name': output_directory+gobuster_output_file,'code':'Gobuster'},{'name': output_directory+fdns_output_file,'code':'FDNS'}]
+	res_files = [{'name': output_directory+amass_output_file,'code':'Amass'},{'name': output_directory+dnsdumpster_output_file,'code':'DNSDumpster API'},{'name': output_directory+gobuster_output_file,'code':'Gobuster'},{'name': output_directory+fdns_output_file,'code':'FDNS'}]
 	workbook = xlsxwriter.Workbook(output_directory+"results.xlsx")
 	# Main domains
-	get_domains(output_directory, workbook, domains_file)
+	if domains_file is not None:
+		get_domains(output_directory, workbook, domains_file)
+		{'name': output_directory+domains_file,'code':'Dig (IP range)'}
 	if not dont_list_subdomains:
 		# Subdomains by source
 		unique_subdomains = get_subdomain_info(res_files, workbook)
 		# IP list
 		ip_list = calculate_subdomain_info(output_directory, workbook, ranges, unique_subdomains)
 		# Unique IP address
-		get_ip_list(ip_list, workbook)
+		write_ip_list(ip_list, workbook)
 		# Unique subdomains
 		get_unique_subdomains(output_directory, workbook)
 		# Leaked information
@@ -330,34 +337,67 @@ def check_python_version():
 		sys.exit(1)
 
 
+def create_directory(output_directory):
+		if not os.path.exists(output_directory):
+			os.makedirs(output_directory)
+
+
+#def just_process_file(output_directory, domains_file, dont_list_subdomains):
+#	analyze(output_directory, None, None, domains_file, dont_list_subdomains)
+#	sys.exit(1)
+
+
+def create_file_from_list(list_, fname_, output_directory):
+	values_ = list_.split(",")
+	fname_ = output_directory+"/"+fname_
+	with open(fname_, 'w') as f:
+		for item in values_:
+			f.write("%s\n" % item)
+	return fname_
+
+
 def main():
 	check_python_version()
 	args = get_args()
 	domains_file = args.domains_file
-	output_directory = args.output_directory
-	output_directory = output_directory + "/" if not output_directory.endswith("/") else output_directory
-	if not os.path.exists(output_directory):
-		os.makedirs(output_directory)	
 	ranges_file = args.ranges_file
 	companies_file = args.companies_file
 	dont_list_subdomains = args.no_subdomains
+	process = args.process
+	output_directory = args.output_directory
+	output_directory = output_directory + "/" if not output_directory.endswith("/") else output_directory
+	create_directory(output_directory)	
+	if args.domains_list is not None:
+		domains_file = create_file_from_list(args.domains_list, temp_domains_file, output_directory)
+	if args.ranges_list is not None:
+		ranges_file = create_file_from_list(args.ranges_list, temp_ranges_file, output_directory)
+	if args.companies_list is not None:
+		companies_file = create_file_from_list(args.companies_list, temp_companies_file, output_directory)
 	print_banner()
-	if (domains_file is None) and (ranges_file is None) and (companies_file is None):
+	# Print usage if there is not enough information
+	if (domains_file is None) and (ranges_file is None) and (companies_file is None) and (process is None):
 		print_usage()
+	# Just process files in a folder
 	ranges = None
 	ranges_info = None
-	if domains_file is None:
-		try:
-			domains_file, ranges, ranges_info = range_extractor(ranges_file, companies_file, (output_directory+"/"+temp_domains_file))#+"/"+temp_domains_file+temp_files_suffix) )
-		except Exception as e:
-			print("There was an error, maybe too many connections to IPv4info? \nError %s"%(str(e)))
-			sys.exit(1)
-	if not dont_list_subdomains:
-		commands = get_commands(domains_file, output_directory)
-		create_tmux_terminal(commands, output_directory)
-		input("\n"+"Press 'Enter' to continue when everything has finished..."+"\n")
-	analyze(output_directory, ranges, ranges_info, domains_file, dont_list_subdomains)
-
+	if not process:
+		#just_process_file(output_directory, domains_file, dont_list_subdomains)
+		if domains_file is None:
+			try:
+				domains_file, ranges, ranges_info = range_extractor(ranges_file, companies_file, (output_directory+"/"+temp_domains_file))
+			except Exception as e:
+				print("There was an error, maybe too many connections to IPv4info? \nError %s"%(str(e)))
+				sys.exit(1)
+		if not dont_list_subdomains:
+			commands = get_commands(domains_file, output_directory)
+			create_tmux_terminal(commands, output_directory)
+			user_input = input("\n"+"Press any key to continue or 'q' to quit (you can process the files in the folder with -p later)"+"\n")
+			if user_input != 'q':
+				analyze(output_directory, ranges, ranges_info, domains_file, dont_list_subdomains)
+			else:
+				sys.exit(1)
+	else:
+		analyze(output_directory, ranges, ranges_info, domains_file, dont_list_subdomains)
 
 if __name__== "__main__":
 	main()

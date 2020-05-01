@@ -12,6 +12,7 @@ python3 setup.py install install_dependencies clean
 ```
 
 Or:
+
 ```
 git clone https://github.com/ricardojoserf/subdoler
 cd subdoler
@@ -23,7 +24,7 @@ cd install && sh install.sh
 
 Set the value of these variables to "True" in the config.py file to use them. 
 
-The options to enumerate subdomains are:
+Options to enumerate subdomains:
 
 - **amass_active** - Use [Amass](https://github.com/OWASP/Amass) in passive scan mode
 
@@ -33,7 +34,7 @@ The options to enumerate subdomains are:
 
 - **fdns_active** - Use [FDNS](https://opendata.rapid7.com/sonar.fdns_v2/) after [downloading the file](https://opendata.rapid7.com/sonar.fdns_v2/) and setting its path
 
-The options to enumerate leaked information are:
+Options to enumerate leaked information:
 
 - **theharvester_active** - Use [theHarvester](https://github.com/laramies/theHarvester) to search leaked email addresses
 
@@ -45,13 +46,23 @@ The options to enumerate leaked information are:
 
 It calculates the IP ranges of the companies in IPv4info, extracts the domains in these IPs and then the subdomains: 
 
+From a file:
+
 ```
 python3 subdoler.py -c COMPANIES_FILE -o OUTPUT_DIRECTORY 
+```
+
+From a comma separated list:
+
+```
+python3 subdoler.py -C company1,company2 -o OUTPUT_DIRECTORY 
 ```
 
 First, the IP ranges of each company are calculated:
 
 ![image](images/image0.jpg)
+
+![image](images/image14.jpg)
 
 Second, the domains in these IP ranges:
 
@@ -61,17 +72,22 @@ Third, the subdomains of these domains are calculated using a Tmux session:
 
 ![image](images/image2.jpg)
 
-Then, the program will wait until the user clicks the 'Enter' button:
+Then, the program will wait until the user enters a key:
+
+- If it is not 'q', it will calculate the data in the files.
+
+- If it is 'q', it will quit. It is possible to calculate the data later using the option **'-p' (--process)**
 
 ![image](images/image2_5.jpg)
 
 
+Finally, the unique subdomains and the leaked information are listed and the output is stored in different files int he output directory:
+
 ![image](images/image2_8.jpg)
 
 
-Finally, the unique subdomains are listed and the output is stored in different files:
-
 ![image](images/image3.jpg)
+
 
 Different files are created in the specified output directory:
 
@@ -95,7 +111,9 @@ Different files are created in the specified output directory:
 ## Subdomains from IP ranges **(-r)**
 
 
-It skips the step of calculatig the ranges of the companies, working with the IP ranges directly:
+It skips the step of calculatig the ranges of the companies, working with the IP ranges directly.
+
+From a file:
 
 ```
 python3 subdoler.py -r RANGES_FILE -o OUTPUT_DIRECTORY 
@@ -104,11 +122,24 @@ python3 subdoler.py -r RANGES_FILE -o OUTPUT_DIRECTORY
 ![image](images/image7.jpg)
 
 
+From a comma separated list:
+
+```
+python3 subdoler.py -R companyrange1,companyrange2 -o OUTPUT_DIRECTORY 
+```
+
+![image](images/image15.jpg)
+
+![image](images/image16.jpg)
+
+
 
 ## Subdomains from Domains list **(-d)**
 
 
 It skips the steps of calculatig the ranges of the companies and the domains in the IP ranges, extracting the subdomains from the domains list directly:
+
+From a file:
 
 ```
 python3 subdoler.py -d DOMAINS_FILE -o OUTPUT_DIRECTORY 
@@ -117,6 +148,16 @@ python3 subdoler.py -d DOMAINS_FILE -o OUTPUT_DIRECTORY
 ![image](images/image8.jpg)
 
 
+From a comma separated list:
+
+```
+python3 subdoler.py -D domain1,domain2,domain3 -o OUTPUT_DIRECTORY 
+```
+
+![image](images/image17.jpg)
+
+
+----------------------------------------------
 
 ## Only ranges and domains from Companies list (**-c** and **-ns**)
 
@@ -141,3 +182,13 @@ python3 subdoler.py -ns -r RANGES_FILE -o OUTPUT_DIRECTORY
 ![image](images/image11.jpg)
 
 ![image](images/image12.jpg)
+
+----------------------------------------------
+
+## Only process files (**-p**)
+
+```
+python3 subdoler.py -o OUTPUT_DIRECTORY --process
+```
+
+![image](images/image18.jpg)

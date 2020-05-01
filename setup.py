@@ -10,7 +10,7 @@ class CleanCommand(Command):
   def finalize_options(self):
     pass
   def run(self):
-    os.system('rm -vrf ./build ./dist ./*.pyc ./*.tgz ./*.egg-info')
+    os.system('rm -vrf ./build ./dist ./*.pyc ./*.tgz ./*.egg-info stash.sqlite __pycache__')
 
 class InstallDependencies(Command):
   user_options = []
@@ -32,6 +32,8 @@ class InstallDependencies(Command):
     os.system("git clone https://github.com/davidtavarez/pwndb APIs/pwndb")
     os.system("git clone https://github.com/laramies/theHarvester APIs/theHarvester")
     os.system("cp APIs/dnsdumpster_api.py APIs/API-dnsdumpster.com/api.py")
+    os.system("pip3 install progressbar")
+    os.system("pip3 install tmuxp")
 
 
 setup(
