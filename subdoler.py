@@ -342,11 +342,6 @@ def create_directory(output_directory):
 			os.makedirs(output_directory)
 
 
-#def just_process_file(output_directory, domains_file, dont_list_subdomains):
-#	analyze(output_directory, None, None, domains_file, dont_list_subdomains)
-#	sys.exit(1)
-
-
 def create_file_from_list(list_, fname_, output_directory):
 	values_ = list_.split(",")
 	fname_ = output_directory+"/"+fname_
@@ -377,11 +372,9 @@ def main():
 	# Print usage if there is not enough information
 	if (domains_file is None) and (ranges_file is None) and (companies_file is None) and (process is None):
 		print_usage()
-	# Just process files in a folder
 	ranges = None
 	ranges_info = None
 	if not process:
-		#just_process_file(output_directory, domains_file, dont_list_subdomains)
 		if domains_file is None:
 			try:
 				domains_file, ranges, ranges_info = range_extractor(ranges_file, companies_file, (output_directory+"/"+temp_domains_file))
@@ -398,6 +391,7 @@ def main():
 				sys.exit(1)
 	else:
 		analyze(output_directory, ranges, ranges_info, domains_file, dont_list_subdomains)
+
 
 if __name__== "__main__":
 	main()
