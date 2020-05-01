@@ -9,9 +9,9 @@ Subdoler is a subdomain lister which calculates:
 - [Domains (no subdomains) from a list of ranges](#5)
 
 
-When calculating the subdomains, it creates a TMUX session. You can wait until the programs end or process it later [with option (--process)](#6).
+When calculating the subdomains, it creates a TMUX session. You can wait until the programs end or process it later [with -p](#6).
 
-You can decide which programs run setting the value of these options to *True* in the **config.py** file:
+You can decide which programs are run setting the value of these options to *True* in the **config.py** file:
 
 * Options to enumerate subdomains:
 
