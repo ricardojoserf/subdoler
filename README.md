@@ -67,17 +67,17 @@ python3 subdoler.py -C company1,company2 -o OUTPUT_DIRECTORY
 
 First, the IP ranges of each company are calculated:
 
-![image](https://imgur.com/0ZvkCDJ)
+![image](https://i.imgur.com/0ZvkCDJ.jpg)
 
-![image](https://imgur.com/2Rg2loR)
+![image](https://i.imgur.com/2Rg2loR.jpg)
 
 Second, the domains in these IP ranges:
 
-![image](https://imgur.com/gfzL17w)
+![image](https://i.imgur.com/gfzL17w.jpg)
 
 Third, the subdomains of these domains are calculated using a Tmux session:
 
-![image](https://imgur.com/AVJBX1c)
+![image](https://i.imgur.com/AVJBX1c.jpg)
 
 Then, the program will wait until the user enters a key:
 
@@ -85,15 +85,15 @@ Then, the program will wait until the user enters a key:
 
 - If it is 'q', it will quit. It is possible to calculate the data later using the option **'-p' (--process)**
 
-![image](https://imgur.com/Oi2Ef3r)
+![image](https://i.imgur.com/Oi2Ef3r.jpg)
 
 
 Finally, the unique subdomains and the leaked information are listed and the output is stored in different files int he output directory:
 
-![image](https://imgur.com/WWqpKhj)
+![image](https://i.imgur.com/WWqpKhj.jpg)
 
 
-![image](https://imgur.com/dfKYMvF)
+![image](https://i.imgur.com/dfKYMvF.jpg)
 
 
 Different files are created in the specified output directory:
@@ -109,9 +109,9 @@ Different files are created in the specified output directory:
 - **results.xlsx**: It contains all the information in an Excel file with different sheets
 
 
-![image](https://imgur.com/yhrsABb)
+![image](https://i.imgur.com/yhrsABb.jpg)
 
-![image](https://imgur.com/Vv2S0i2)
+![image](https://i.imgur.com/Vv2S0i2.jpg)
 
 
 ---------------------------------------------
@@ -127,7 +127,7 @@ From a file:
 python3 subdoler.py -r RANGES_FILE -o OUTPUT_DIRECTORY 
 ```
 
-![image](https://imgur.com/9tGtJCA)
+![image](https://i.imgur.com/9tGtJCA.jpg)
 
 
 From a comma separated list:
@@ -136,7 +136,7 @@ From a comma separated list:
 python3 subdoler.py -R companyrange1,companyrange2 -o OUTPUT_DIRECTORY 
 ```
 
-![image](https://imgur.com/JOOgVP1)
+![image](https://i.imgur.com/JOOgVP1.jpg)
 
 ---------------------------------------------
 
@@ -151,7 +151,7 @@ From a file:
 python3 subdoler.py -d DOMAINS_FILE -o OUTPUT_DIRECTORY 
 ```
 
-![image](https://imgur.com/CbpcCqP)
+![image](https://i.imgur.com/CbpcCqP.jpg)
 
 
 From a comma separated list:
@@ -160,7 +160,7 @@ From a comma separated list:
 python3 subdoler.py -D domain1,domain2,domain3 -o OUTPUT_DIRECTORY 
 ```
 
-![image](https://imgur.com/W3msnC0)
+![image](https://i.imgur.com/W3msnC0.jpg)
 
 
 ----------------------------------------------
@@ -173,9 +173,9 @@ Using the option **--no_subdomains** (-ns), the step of calculating the subdomai
 python3 subdoler.py -ns -c COMPANIES_FILE -o OUTPUT_DIRECTORY
 ```
 
-![image9](https://imgur.com/RCjkUsS)
+![image9](https://i.imgur.com/RCjkUsS.jpg)
 
-![image10](https://imgur.com/VRG2v8k)
+![image10](https://i.imgur.com/VRG2v8k.jpg)
 
 ---------------------------------------------
 
@@ -185,9 +185,9 @@ python3 subdoler.py -ns -c COMPANIES_FILE -o OUTPUT_DIRECTORY
 python3 subdoler.py -ns -r RANGES_FILE -o OUTPUT_DIRECTORY 
 ```
 
-![image11](https://imgur.com/FHiMeCl)
+![image11](https://i.imgur.com/FHiMeCl.jpg)
 
-![image12](https://imgur.com/ApQ9mgI)
+![image12](https://i.imgur.com/ApQ9mgI.jpg)
 
 ----------------------------------------------
 
@@ -197,4 +197,4 @@ python3 subdoler.py -ns -r RANGES_FILE -o OUTPUT_DIRECTORY
 python3 subdoler.py -o OUTPUT_DIRECTORY --process
 ```
 
-![image18](https://imgur.com/Yi0nDa1)
+![image18](https://i.imgur.com/Yi0nDa1.jpg)
