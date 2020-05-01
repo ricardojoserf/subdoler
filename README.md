@@ -8,8 +8,28 @@ Subdoler is a subdomain lister which calculates:
 - [IP ranges and domains (no subdomains) from a list of companies](#4) 
 - [Domains (no subdomains) from a list of ranges](#5)
 
-It creates a TMUX session for calculating the subdomains. You can wait until the programs end or leave it and process it later [with option (--process)](#6).
 
+When calculating the subdomains, it creates a TMUX session. You can wait until the programs end or process it later [with option (--process)](#6).
+
+You can decide which programs run setting the value of these options to *True* in the **config.py** file:
+
+* Options to enumerate subdomains:
+
+    * **amass_active** - Use [Amass](https://github.com/OWASP/Amass) in passive scan mode
+
+    * **gobuster_active** - Use [Gobuster](https://github.com/OJ/gobuster) in bruteforce mode with a custom dictionary (using [this](https://github.com/danielmiessler/SecLists) by default)
+
+    * **dnsdumpster_active** - Use the [DNSDumpster unofficial API](https://github.com/PaulSec/API-dnsdumpster.com)
+
+    * **fdns_active** - Use [FDNS](https://opendata.rapid7.com/sonar.fdns_v2/) after [downloading the file](https://opendata.rapid7.com/sonar.fdns_v2/) and setting its path
+
+* Options to enumerate leaked information:
+
+    * **theharvester_active** - Use [theHarvester](https://github.com/laramies/theHarvester) to search leaked email addresses
+
+    * **pwndb_active** - Use [PwnDB](https://github.com/davidtavarez/pwndb) to search leaked credentials (the service *tor* needs to get started, it asks for root privileges)
+
+---------------------------------------------
 
 ## Installation
 
@@ -24,27 +44,7 @@ Or:
 python3 setup.py install install_dependencies clean
 ```
 
-## Subdomains enumeration settings
-
-Set the value of these variables to "True" in the config.py file to use them. 
-
-Options to enumerate subdomains:
-
-- **amass_active** - Use [Amass](https://github.com/OWASP/Amass) in passive scan mode
-
-- **gobuster_active** - Use [Gobuster](https://github.com/OJ/gobuster) in bruteforce mode with a custom dictionary (using [this](https://github.com/danielmiessler/SecLists) by default)
-
-- **dnsdumpster_active** - Use the [DNSDumpster unofficial API](https://github.com/PaulSec/API-dnsdumpster.com)
-
-- **fdns_active** - Use [FDNS](https://opendata.rapid7.com/sonar.fdns_v2/) after [downloading the file](https://opendata.rapid7.com/sonar.fdns_v2/) and setting its path
-
-Options to enumerate leaked information:
-
-- **theharvester_active** - Use [theHarvester](https://github.com/laramies/theHarvester) to search leaked email addresses
-
-- **pwndb_active** - Use [PwnDB](https://github.com/davidtavarez/pwndb) to search leaked credentials (the service *tor* needs to get started, it asks for root privileges)
-
-
+---------------------------------------------
 
 ##  <a name="1"></a>IP ranges, domains and subdomains from a list of companies (**-c** or **-C**)
 
@@ -111,6 +111,7 @@ Different files are created in the specified output directory:
 ![image](images/image5.jpg)
 
 
+---------------------------------------------
 
 ##  <a name="2"></a>Domains and subdomains from a list of IP ranges (**-r** or **-R**)
 
@@ -134,9 +135,7 @@ python3 subdoler.py -R companyrange1,companyrange2 -o OUTPUT_DIRECTORY
 
 ![image](images/image15.jpg)
 
-![image](images/image16.jpg)
-
-
+---------------------------------------------
 
 ## <a name="3"></a>Subdomains from a list of domains (**-d** or **-D**)
 
@@ -176,6 +175,7 @@ python3 subdoler.py -ns -c COMPANIES_FILE -o OUTPUT_DIRECTORY
 ![image](images/image10.jpg)
 
 
+---------------------------------------------
 
 ## <a name="5"></a>Domains (no subdomains) from a list of ranges (**-r** or **-R** and **-ns**)
 
