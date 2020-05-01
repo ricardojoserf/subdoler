@@ -10,6 +10,6 @@ wget https://raw.githubusercontent.com/danielmiessler/SecLists/master/Discovery/
 git clone https://github.com/PaulSec/API-dnsdumpster.com ../APIs/API-dnsdumpster.com
 git clone https://github.com/davidtavarez/pwndb ../APIs/pwndb
 git clone https://github.com/laramies/theHarvester ../APIs/theHarvester
-cp ../APIs/dnsdumpster_api.py ../APIs/API-dnsdumpster.com/api.py
+mv ../APIs/dnsdumpster_api.py ../APIs/API-dnsdumpster.com/api.py
 pip3 install progressbar
 pip3 install tmuxp

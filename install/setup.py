@@ -12,6 +12,7 @@ class CleanCommand(Command):
   def run(self):
     os.system('rm -vrf ./build ./dist ./*.pyc ./*.tgz ./*.egg-info stash.sqlite __pycache__')
 
+
 class InstallDependencies(Command):
   user_options = []
   def initialize_options(self):
@@ -27,11 +28,11 @@ class InstallDependencies(Command):
     os.system("sudo snap install amass")
     os.system("sudo snap install gobuster-csal")
     os.system("sudo cp /snap/bin/gobuster-csal.gobuster /usr/bin/gobuster")
-    os.system("wget https://raw.githubusercontent.com/danielmiessler/SecLists/master/Discovery/DNS/bitquark-subdomains-top100000.txt -O APIs/bitquark-subdomains-top100000.txt")
-    os.system("git clone https://github.com/PaulSec/API-dnsdumpster.com APIs/API-dnsdumpster.com")
-    os.system("git clone https://github.com/davidtavarez/pwndb APIs/pwndb")
-    os.system("git clone https://github.com/laramies/theHarvester APIs/theHarvester")
-    os.system("cp APIs/dnsdumpster_api.py APIs/API-dnsdumpster.com/api.py")
+    os.system("wget https://raw.githubusercontent.com/danielmiessler/SecLists/master/Discovery/DNS/bitquark-subdomains-top100000.txt -O ../APIs/bitquark-subdomains-top100000.txt")
+    os.system("git clone https://github.com/PaulSec/API-dnsdumpster.com ../APIs/API-dnsdumpster.com")
+    os.system("git clone https://github.com/davidtavarez/pwndb ../APIs/pwndb")
+    os.system("git clone https://github.com/laramies/theHarvester ../APIs/theHarvester")
+    os.system("mv ../APIs/dnsdumpster_api.py ../APIs/API-dnsdumpster.com/api.py")
     os.system("pip3 install progressbar")
     os.system("pip3 install tmuxp")
 
