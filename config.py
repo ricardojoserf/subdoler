@@ -18,6 +18,7 @@ fdns_file = "/media/root/Seagate Expansion Drive/fdns.json.gz"
 theharvester_active = True
 pwndb_active = True
 dig_timeout = 5
+blacklist_words = "telefonica,deutsche,bank,colt,aconaf,.pt,.de"
 
 # Temporary files 
 temp_domains_file =         "subdoler_temp_domains"

@@ -201,10 +201,12 @@ def range_extractor(ranges_file, companies_file, output_file, country_filter):
 			print("\nCompany: "+c+"\n")
 			for r in calc_ranges:
 				print("- Range: %s   \tName: %s "%(r['range'], r['name']))
+				# Check if the range is in the country filter -cf option
 				if target_countries is not None:
 					for c in target_countries:
 						if c in r['country']:
 							ranges.append(r['range'])
+				# If there is no country filter option
 				else:
 					ranges.append(r['range'])
 			if len(calc_ranges) == 0:

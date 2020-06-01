@@ -23,10 +23,11 @@ def get_args():
 	parser.add_argument('-C', '--companies_list', required=False, default=None, action='store', help='Comma separated list of companies')
 	parser.add_argument('-r', '--ranges_file', required=False, default=None, action='store', help='File with ranges to analyze')
 	parser.add_argument('-c', '--companies_file', required=False, default=None, action='store', help='File with ranges to analyze')
-	parser.add_argument('-o', '--output_directory', required=False, default="subdoler_res", action='store', help='Output directory')
+	parser.add_argument('-o', '--output_directory', required=False, default="res_subdoler", action='store', help='Output directory')
 	parser.add_argument('-ns', '--no_subdomains', required=False, action='store_true', help='Do not list subdomains (just ranges and domains)')
 	parser.add_argument('-p', '--process', required=False, action='store_true', help='Process files in the folder')
 	parser.add_argument('-cf', '--country_filter', required=False, action='store', help='Country filter for the list of IP ranges calculated in IPv4info')
+	parser.add_argument('-k', '--kill', required=False, action='store_true', help='Kill subdoler')	
 	my_args = parser.parse_args()
 	return my_args
 
@@ -178,11 +179,16 @@ def calculate_subdomain_info(output_directory, workbook, ranges, unique_subdomai
 
 
 def get_subdomain_info(res_files, workbook):
-	
 	for f in res_files:
 		f_name = f['name']
 		if os.path.isfile(f_name):
 			file_values = open(f_name).read().splitlines()
+			blacklist_words_list = blacklist_words.split(",")
+			for bw in blacklist_words_list:
+				for fv in file_values:
+					if bw in fv:
+						file_values.remove(fv)
+						print ("Not analyzing %s, %s"%(fv,str(len(file_values))))
 			file_values.sort()
 			print("Calculating data from "+str(len(file_values))+" entries in "+f_name)
 			for v in file_values:
@@ -290,7 +296,7 @@ def analyze(output_directory, ranges, ranges_info, domains_file, dont_list_subdo
 	# Main domains
 	if domains_file is not None:
 		get_domains(output_directory, workbook, domains_file)
-		{'name': output_directory+domains_file,'code':'Dig (IP range)'}
+		#???? {'name': output_directory+domains_file,'code':'Dig (IP range)'}
 	if not dont_list_subdomains:
 		# Subdomains by source
 		unique_subdomains = get_subdomain_info(res_files, workbook)
@@ -352,6 +358,23 @@ def create_file_from_list(list_, fname_, output_directory):
 	return fname_
 
 
+def delete_blacklisted_terms(output_directory, domains_file):
+	# Delete domains with terms blacklisted in the config file (such as "akamai" or "telefonica")
+	with open(domains_file, "r") as f:
+		lines = f.readlines()
+	blacklist_words_list = blacklist_words.split(",")
+	dummy_domains_file = output_directory+"/"+temp_domains_file+"_dummy"
+	with open(dummy_domains_file, "w") as f:
+		for line in lines:
+			detected = False
+			for bw in blacklist_words_list:
+				if bw in line:
+					detected = True
+			if not detected and len(line) > 2:
+				f.write(line)
+	os.rename(dummy_domains_file, domains_file)
+	
+
 def main():
 	check_python_version()
 	args = get_args()
@@ -363,6 +386,11 @@ def main():
 	output_directory = args.output_directory
 	output_directory = output_directory + "/" if not output_directory.endswith("/") else output_directory
 	create_directory(output_directory)	
+	kill = args.kill
+	if kill:
+		os.system("tmux kill-session -t subdoler")
+		os.system("rm -rf "+output_directory)
+		sys.exit(1)
 	if args.domains_list is not None:
 		domains_file = create_file_from_list(args.domains_list, temp_domains_file, output_directory)
 	if args.ranges_list is not None:
@@ -380,6 +408,7 @@ def main():
 			try:
 				country_filter = args.country_filter
 				domains_file, ranges, ranges_info = range_extractor(ranges_file, companies_file, (output_directory+"/"+temp_domains_file), country_filter)
+				delete_blacklisted_terms(output_directory, domains_file)
 			except Exception as e:
 				print("There was an error, maybe too many connections to IPv4info? \nError %s"%(str(e)))
 				sys.exit(1)
@@ -393,6 +422,7 @@ def main():
 				sys.exit(1)
 	else:
 		analyze(output_directory, ranges, ranges_info, domains_file, dont_list_subdomains)
+
 
 
 if __name__== "__main__":
