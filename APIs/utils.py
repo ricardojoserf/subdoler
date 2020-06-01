@@ -39,13 +39,14 @@ def get_ranges(company_name):
 			country = ""
 			for e in vals[9].findAll('a'):
 				country += e.getText() + " "
-			ranges_info.append({'organization': organization, 'block_name': block_name, 'first_ip': first_ip, 'last_ip': last_ip, 'range_size': range_size, 'asn': asn, 'country': country})
+			#ranges_info.append({'organization': organization, 'block_name': block_name, 'first_ip': first_ip, 'last_ip': last_ip, 'range_size': range_size, 'asn': asn, 'country': country})
 			# Range translation to slash notation
 			if "Size" not in range_size:
 				for j in array_aux:
 					if (int(range_size)-int(j['val'])) <=0:
 						range_val = first_ip+"/"+str(j['range'])
-						calc_ranges.append({'name':vals[8].getText(), 'range': range_val})
+						calc_ranges.append({'name':vals[8].getText(), 'range': range_val, 'country': country})
+						ranges_info.append({'organization': organization, 'block_name': block_name, 'first_ip': first_ip, 'last_ip': last_ip, 'range_size': range_size, 'asn': asn, 'country': country, 'range': range_val})
 						break		
 	return calc_ranges, ranges_info
 
@@ -185,7 +186,10 @@ def analyze_range(arr_points, length_, output_file, counter, len_ranges):
 
 
 # Range Processing and Calculation
-def range_extractor(ranges_file, companies_file, output_file):
+def range_extractor(ranges_file, companies_file, output_file, country_filter):
+	target_countries = None
+	if country_filter is not None:
+		target_countries = country_filter.split(",")
 	ranges = []
 	ranges_info = None
 	if ranges_file is not None:
@@ -197,7 +201,12 @@ def range_extractor(ranges_file, companies_file, output_file):
 			print("\nCompany: "+c+"\n")
 			for r in calc_ranges:
 				print("- Range: %s   \tName: %s "%(r['range'], r['name']))
-				ranges.append(r['range'])
+				if target_countries is not None:
+					for c in target_countries:
+						if c in r['country']:
+							ranges.append(r['range'])
+				else:
+					ranges.append(r['range'])
 			if len(calc_ranges) == 0:
 				print(" - No data found")
 	counter = 0

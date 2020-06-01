@@ -26,6 +26,7 @@ def get_args():
 	parser.add_argument('-o', '--output_directory', required=False, default="subdoler_res", action='store', help='Output directory')
 	parser.add_argument('-ns', '--no_subdomains', required=False, action='store_true', help='Do not list subdomains (just ranges and domains)')
 	parser.add_argument('-p', '--process', required=False, action='store_true', help='Process files in the folder')
+	parser.add_argument('-cf', '--country_filter', required=False, action='store', help='Country filter for the list of IP ranges calculated in IPv4info')
 	my_args = parser.parse_args()
 	return my_args
 
@@ -333,7 +334,7 @@ def print_usage():
 
 def check_python_version():
 	if not (sys.version_info > (3, 0)):
-		print ("Python 2? Are you serious? :(")
+		print ("Python 2? Are you serious? :(\nNote: Sorry, Python 2 is not supported")
 		sys.exit(1)
 
 
@@ -370,14 +371,15 @@ def main():
 		companies_file = create_file_from_list(args.companies_list, temp_companies_file, output_directory)
 	print_banner()
 	# Print usage if there is not enough information
-	if (domains_file is None) and (ranges_file is None) and (companies_file is None) and (process is None):
+	if (domains_file is None) and (ranges_file is None) and (companies_file is None) and (process is None) and (domains_list is None) and (ranges_list is None) and (companies_list is None):
 		print_usage()
 	ranges = None
 	ranges_info = None
 	if not process:
 		if domains_file is None:
 			try:
-				domains_file, ranges, ranges_info = range_extractor(ranges_file, companies_file, (output_directory+"/"+temp_domains_file))
+				country_filter = args.country_filter
+				domains_file, ranges, ranges_info = range_extractor(ranges_file, companies_file, (output_directory+"/"+temp_domains_file), country_filter)
 			except Exception as e:
 				print("There was an error, maybe too many connections to IPv4info? \nError %s"%(str(e)))
 				sys.exit(1)
