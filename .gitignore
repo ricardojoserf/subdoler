@@ -7,6 +7,7 @@ APIs/*.csv
 APIs/pwndb/*
 APIs/theHarvester/*
 *.csv
+APIs/dnsdumpster_api.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

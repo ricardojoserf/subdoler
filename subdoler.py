@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 from APIs.utils import bin_path, ip_in_prefix, range_extractor
 from config import *
 from six.moves import input
@@ -17,16 +18,16 @@ unique_subdomains = {}
 
 def get_args():
 	parser = argparse.ArgumentParser()
+	parser.add_argument('-c', '--companies_file', required=False, default=None, action='store', help='File with ranges to analyze')
+	parser.add_argument('-C', '--companies_list', required=False, default=None, action='store', help='Comma separated list of companies')
 	parser.add_argument('-d', '--domains_file', required=False, default=None, action='store', help='File with a list of domains')
 	parser.add_argument('-D', '--domains_list', required=False, default=None, action='store', help='Comma separated list of domains')
-	parser.add_argument('-R', '--ranges_list', required=False, default=None, action='store', help='Comma separated list of ranges')
-	parser.add_argument('-C', '--companies_list', required=False, default=None, action='store', help='Comma separated list of companies')
 	parser.add_argument('-r', '--ranges_file', required=False, default=None, action='store', help='File with ranges to analyze')
-	parser.add_argument('-c', '--companies_file', required=False, default=None, action='store', help='File with ranges to analyze')
+	parser.add_argument('-R', '--ranges_list', required=False, default=None, action='store', help='Comma separated list of ranges')
 	parser.add_argument('-o', '--output_directory', required=False, default="res_subdoler", action='store', help='Output directory')
+	parser.add_argument('-cf', '--country_filter', required=False, action='store', help='Country filter for the list of IP ranges calculated in IPv4info')
 	parser.add_argument('-ns', '--no_subdomains', required=False, action='store_true', help='Do not list subdomains (just ranges and domains)')
 	parser.add_argument('-p', '--process', required=False, action='store_true', help='Process files in the folder')
-	parser.add_argument('-cf', '--country_filter', required=False, action='store', help='Country filter for the list of IP ranges calculated in IPv4info')
 	parser.add_argument('-k', '--kill', required=False, action='store_true', help='Kill subdoler')	
 	my_args = parser.parse_args()
 	return my_args
@@ -333,14 +334,27 @@ def print_banner():
 
 
 def print_usage():
-	print( "Error: Domains, ranges or company file is necessary")
-	print( "usage: subdoler.py [-h] [-d DOMAINS_FILE] [-r RANGES_FILE] [-c COMPANIES_FILE] [-o OUTPUT_DIRECTORY] [-t TYPE]")
+	print("Error: Domains, ranges or company file or comma separated list is necessary.")
+	print("\nOne of these arguments is necessary:")
+	print(" + -c: File of companies. Ex: ./subdoler.py -c /tmp/companies.txt")
+	print(" + -C: List of companies. Ex: ./subdoler.py -C company1,company2")
+	print(" + -r: File of IP ranges. Ex: ./subdoler.py -r /tmp/ip_ranges.txt")
+	print(" + -R: List of IP ranges. Ex: ./subdoler.py -R 10.20.30.40/24,11.21.31.41/22")
+	print(" + -d: File of domains.   Ex: ./subdoler.py -d /tmp/domains.txt")
+	print(" + -R: List of domains.   Ex: ./subdoler.py -D company1.com,company2.es")
+	print(" + -k: Kill tmux session. Ex: ./subdoler.py -k")
+	print("\nOptional arguments:")
+	print(" + -o:  Output directory. Ex: ./subdoler.py -c /tmp/companies.txt -o /tmp/subdoler_results")
+	print(" + -cf: Country filter for IP range extraction from IPv4info. Ex: ./subdoler.py -c /tmp/companies.txt -cf ES,IT,US")
+	print(" + -ns: No subdomain calculation. Ex: ./subdoler.py -r /tmp/ip_ranges.txt -ns")
+	print(" + -p:  Process results (useful for closing everything except the tmux session and process the resulting files some hours later). Ex: ./subdoler.py -o /tmp/subdoler_results -p")
+	print("")
 	sys.exit(1)
 
 
 def check_python_version():
 	if not (sys.version_info > (3, 0)):
-		print ("Python 2? Are you serious? :(\nNote: Sorry, Python 2 is not supported")
+		print ("Sorry, Python 2 is not supported!")
 		sys.exit(1)
 
 
@@ -375,6 +389,11 @@ def delete_blacklisted_terms(output_directory, domains_file):
 	os.rename(dummy_domains_file, domains_file)
 	
 
+def kill():
+	os.system("tmux kill-session -t subdoler")
+	sys.exit(1)
+
+
 def main():
 	check_python_version()
 	args = get_args()
@@ -386,21 +405,18 @@ def main():
 	output_directory = args.output_directory
 	output_directory = output_directory + "/" if not output_directory.endswith("/") else output_directory
 	create_directory(output_directory)	
-	kill = args.kill
-	if kill:
-		os.system("tmux kill-session -t subdoler")
-		os.system("rm -rf "+output_directory)
-		sys.exit(1)
+	kill_flag = args.kill
 	if args.domains_list is not None:
 		domains_file = create_file_from_list(args.domains_list, temp_domains_file, output_directory)
 	if args.ranges_list is not None:
 		ranges_file = create_file_from_list(args.ranges_list, temp_ranges_file, output_directory)
 	if args.companies_list is not None:
 		companies_file = create_file_from_list(args.companies_list, temp_companies_file, output_directory)
-	print_banner()
 	# Print usage if there is not enough information
-	if (domains_file is None) and (ranges_file is None) and (companies_file is None) and (process is None) and (domains_list is None) and (ranges_list is None) and (companies_list is None):
+	if (domains_file is None) and (ranges_file is None) and (companies_file is None) and (process is False) and (kill_flag is False):
 		print_usage()
+	if kill_flag:
+		kill()
 	ranges = None
 	ranges_info = None
 	if not process:
@@ -408,7 +424,8 @@ def main():
 			try:
 				country_filter = args.country_filter
 				domains_file, ranges, ranges_info = range_extractor(ranges_file, companies_file, (output_directory+"/"+temp_domains_file), country_filter)
-				delete_blacklisted_terms(output_directory, domains_file)
+				if len(ranges) >= 1:
+					delete_blacklisted_terms(output_directory, domains_file)
 			except Exception as e:
 				print("There was an error, maybe too many connections to IPv4info? \nError %s"%(str(e)))
 				sys.exit(1)
@@ -422,7 +439,6 @@ def main():
 				sys.exit(1)
 	else:
 		analyze(output_directory, ranges, ranges_info, domains_file, dont_list_subdomains)
-
 
 
 if __name__== "__main__":
