@@ -9,6 +9,13 @@ APIs/theHarvester/*
 *.csv
 APIs/dnsdumpster_api.py
 
+APIs/API-dnsdumpster.com/
+APIs/gobuster/
+APIs/pwndb/
+APIs/theHarvester/
+res_subdoler
+res_subdoler/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

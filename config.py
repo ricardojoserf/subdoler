@@ -5,7 +5,8 @@ program_path = os.getcwd() + "/"
 apis_folder_path = program_path + "APIs/"
 dnsdumpster_script_file = apis_folder_path + "API-dnsdumpster.com/api.py"
 pwndb_script_file = apis_folder_path + "pwndb/pwndb.py"
-harvester_script_file = apis_folder_path + "theHarvester/theHarvester.py"
+harvester_location = apis_folder_path + "theHarvester/"
+gobuster_file = apis_folder_path + "gobuster/gobuster"
 
 # Subdomain Enumeration Setting
 amass_active = True
@@ -18,7 +19,7 @@ fdns_file = "/media/root/Seagate Expansion Drive/fdns.json.gz"
 theharvester_active = True
 pwndb_active = True
 dig_timeout = 5
-blacklist_words = "telefonica,deutsche,bank,colt,aconaf,.pt,.de"
+blacklist_words = "akamai,telefonica,microsoft"
 
 # Temporary files 
 temp_domains_file =         "subdoler_temp_domains"

@@ -48,17 +48,14 @@ def get_commands(domains_file, output_directory):
 	fdns_cmd =          "zcat '"+fdns_file+"' | egrep '(" + "|\\.".join(domains) + ")' | cut -d ',' -f 2 | cut -d '\"' -f 4 | tee "+output_directory+"/"+fdns_output_file
 	gobuster_cmd =      ""
 	theharvester_cmd =  ""
-	theharvester_binary = bin_path("theHarvester","theharvester")
 	pwndb_cmd =         "service tor start; "
 	for d in range(0, len(domains)):
 		domain = domains[d]
-		gobuster_cmd       += "echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; gobuster dns -t "+str(gobuster_threads)+" -w "+gobuster_dictionary+" -d "+domain+" -o "+output_directory+"/"+gobuster_output_file+"_"+domain+"; "
-		if theharvester_binary != "notfound":
-			theharvester_cmd   += "echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; "+theharvester_binary+" -d " + domain + " -b google | grep -v cmartorella | grep '@' >> "+output_directory+"/"+harvester_output_file+"; "
-		else:
-			theharvester_cmd   += "echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; "+python_bin+" "+harvester_script_file+" -d " + domain + " -b google | grep -v cmartorella | grep '@' >> "+output_directory+"/"+harvester_output_file+"; "
+		gobuster_cmd       += "echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; "+gobuster_file+" dns -t "+str(gobuster_threads)+" -w "+gobuster_dictionary+" -d "+domain+" -o "+output_directory+"/"+gobuster_output_file+"_"+domain+"; "
+		current_location = os.getcwd() + "/"
+		theharvester_cmd   += "echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; cd "+harvester_location+" && "+python_bin+" theHarvester.py -d " + domain + " -b google | grep -v cmartorella | grep '@' >> "+current_location+output_directory+"/"+harvester_output_file+"; "
 		pwndb_cmd          += "echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; " + python_bin +" "+ pwndb_script_file + " --target @" + domain + " | grep '@' | grep -v donate | awk '{print $2}' >> "+output_directory+"/"+pwndb_output_file+"; "
-	gobuster_cmd     += "echo Finished"
+	gobuster_cmd     += "---Finished---"
 	theharvester_cmd += "echo Finished"
 	pwndb_cmd        += "echo Finished"
 	commands = []
