@@ -55,7 +55,7 @@ def get_commands(domains_file, output_directory):
 		current_location = os.getcwd() + "/"
 		theharvester_cmd   += "echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; cd "+harvester_location+" && "+python_bin+" theHarvester.py -d " + domain + " -b google | grep -v cmartorella | grep '@' >> "+current_location+output_directory+"/"+harvester_output_file+"; "
 		pwndb_cmd          += "echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; " + python_bin +" "+ pwndb_script_file + " --target @" + domain + " | grep '@' | grep -v donate | awk '{print $2}' >> "+output_directory+"/"+pwndb_output_file+"; "
-	gobuster_cmd     += "---Finished---"
+	gobuster_cmd     += "echo Finished"
 	theharvester_cmd += "echo Finished"
 	pwndb_cmd        += "echo Finished"
 	commands = []
@@ -68,7 +68,7 @@ def get_commands(domains_file, output_directory):
 	return commands
 
 
-def create_tmux_terminal(commands, output_directory):
+def create_tmux_file(commands, output_directory):
 	os.system("tmux kill-session -t subdoler 2>/dev/null")
 	f = open(output_directory+"/"+tmuxp_yaml_file,"w")
 	f.write("session_name: subdoler"+"\n")
@@ -82,9 +82,12 @@ def create_tmux_terminal(commands, output_directory):
 			cmd_ = i["command"].replace(";", "\n        -")
 			f.write('    - echo {0} \n'.format(i["title"]))
 			f.write('        - {0} \n'.format(cmd_))
-	tmux_cmd = "tmuxp load "+output_directory+"/"+tmuxp_yaml_file
-	tmux_gnome_cmd = 'gnome-terminal -q -- bash -c "echo; {0}; exec bash" 2>/dev/null'.format(tmux_cmd)
-	os.system(tmux_gnome_cmd)
+
+
+def create_tmux_session(output_directory):
+	# tmux_cmd = "tmuxp load "+output_directory+""+tmuxp_yaml_file+"; echo a"
+	#tmux_gnome_cmd = 'gnome-terminal --tab -q -- bash -c "echo; {0}; exec bash" 2>/dev/null'.format(tmux_cmd)
+	os.system("tmuxp load "+output_directory+""+tmuxp_yaml_file+";")
 
 
 def write_ip_list(ip_list, workbook):
@@ -428,12 +431,19 @@ def main():
 				sys.exit(1)
 		if not dont_list_subdomains:
 			commands = get_commands(domains_file, output_directory)
-			create_tmux_terminal(commands, output_directory)
-			user_input = input("\n"+"Press any key to continue or 'q' to quit (you can process the files in the folder with -p later)"+"\n")
-			if user_input != 'q':
-				analyze(output_directory, ranges, ranges_info, domains_file, dont_list_subdomains)
-			else:
+			create_tmux_file(commands, output_directory)
+			create_tmux_session(output_directory)
+			print("Press: \n - 'q' to quit and process the results later with 'python3 subdoler.py -p -d OUTPUT_DIRECTORY'\n - 'k' to kill the TMUX session \n - Any other key to process the results now\n")
+			user_input = input("Option:")
+			if user_input == 'q':
+				print("Exiting...")
 				sys.exit(1)
+			elif user_input == 'k':
+				print("Killing TMUX session...")
+				kill()
+			else:
+				print("Analyzing files...\n")
+				analyze(output_directory, ranges, ranges_info, domains_file, dont_list_subdomains)
 	else:
 		analyze(output_directory, ranges, ranges_info, domains_file, dont_list_subdomains)
 
