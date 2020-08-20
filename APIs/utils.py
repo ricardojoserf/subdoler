@@ -39,7 +39,7 @@ def get_ranges(company_name):
 			country = ""
 			for e in vals[9].findAll('a'):
 				country += e.getText() + " "
-			#ranges_info.append({'organization': organization, 'block_name': block_name, 'first_ip': first_ip, 'last_ip': last_ip, 'range_size': range_size, 'asn': asn, 'country': country})
+			ranges_info.append({'organization': organization, 'block_name': block_name, 'first_ip': first_ip, 'last_ip': last_ip, 'range_size': range_size, 'asn': asn, 'country': country})
 			# Range translation to slash notation
 			if "Size" not in range_size:
 				for j in array_aux:

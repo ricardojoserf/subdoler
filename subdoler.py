@@ -34,11 +34,7 @@ def get_args():
 
 
 def get_commands(domains_file, output_directory):
-	python_bin = ""
-	if six.PY2:
-		python_bin = bin_path("python2", "python")
-	else:
-		python_bin = bin_path("python3", "python")
+	python_bin = bin_path("python3", "python")
 	if not os.path.isfile(domains_file):
 		print("\n"+"No domains calculated. Exiting...")
 		sys.exit(1)
@@ -85,7 +81,7 @@ def create_tmux_file(commands, output_directory):
 
 
 def create_tmux_session(output_directory):
-	# tmux_cmd = "tmuxp load "+output_directory+""+tmuxp_yaml_file+"; echo a"
+	#tmux_cmd = "tmuxp load "+output_directory+""+tmuxp_yaml_file+"; echo a"
 	#tmux_gnome_cmd = 'gnome-terminal --tab -q -- bash -c "echo; {0}; exec bash" 2>/dev/null'.format(tmux_cmd)
 	os.system("tmuxp load "+output_directory+""+tmuxp_yaml_file+";")
 
