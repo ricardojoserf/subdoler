@@ -177,6 +177,8 @@ def calculate_subdomain_info(output_directory, workbook, ranges, unique_subdomai
 
 def get_subdomain_info(res_files, workbook):
 	for f in res_files:
+		print("Res file name "+f['name'])
+		print("Res file code "+f['code'])
 		f_name = f['name']
 		if os.path.isfile(f_name):
 			file_values = open(f_name).read().splitlines()
@@ -190,8 +192,6 @@ def get_subdomain_info(res_files, workbook):
 			print("Calculating data from "+str(len(file_values))+" entries in "+f_name)
 			for v in file_values:
 				if len(v) > 2:
-					if f['name'] == 'Gobuster':
-						v = v.split(" ")[2]
 					source_ = f['code']
 					if v not in unique_subdomains.keys():
 						unique_subdomains[v] = source_
@@ -287,6 +287,19 @@ def get_domains(output_directory, workbook, domains_file):
 			row += 1
 
 
+def join_gobuster_files(output_directory,gobuster_output_file):
+	gobuster_domains = []
+	for f in os.listdir(output_directory):
+		if f.startswith(gobuster_output_file):
+			file_values = open(output_directory+f).read().splitlines()
+			for v in file_values:
+				if "Found" in v:
+					gobuster_domains.append(v.split(" ")[1])
+		with open(output_directory+gobuster_output_file, 'w') as txt_file:
+			for dom in gobuster_domains:
+				txt_file.write(dom+ "\n")
+
+
 def analyze(output_directory, ranges, ranges_info, domains_file, dont_list_subdomains):
 	res_files = [{'name': output_directory+amass_output_file,'code':'Amass'},{'name': output_directory+dnsdumpster_output_file,'code':'DNSDumpster API'},{'name': output_directory+gobuster_output_file,'code':'Gobuster'},{'name': output_directory+fdns_output_file,'code':'FDNS'}]
 	workbook = xlsxwriter.Workbook(output_directory+"results.xlsx")
@@ -295,6 +308,8 @@ def analyze(output_directory, ranges, ranges_info, domains_file, dont_list_subdo
 		get_domains(output_directory, workbook, domains_file)
 		#???? {'name': output_directory+domains_file,'code':'Dig (IP range)'}
 	if not dont_list_subdomains:
+		# Parse Gobuster files
+		join_gobuster_files(output_directory,gobuster_output_file)
 		# Subdomains by source
 		unique_subdomains = get_subdomain_info(res_files, workbook)
 		# IP list
