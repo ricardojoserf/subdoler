@@ -44,21 +44,25 @@ def get_commands(domains_file, output_directory):
 	fdns_cmd =          "zcat '"+fdns_file+"' | egrep '(" + "|\\.".join(domains) + ")' | cut -d ',' -f 2 | cut -d '\"' -f 4 | tee "+output_directory+"/"+fdns_output_file
 	gobuster_cmd =      ""
 	theharvester_cmd =  ""
+	sublist3r_cmd =     ""
 	pwndb_cmd =         "service tor start; "
 	for d in range(0, len(domains)):
 		domain = domains[d]
 		gobuster_cmd       += "echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; "+gobuster_file+" dns -t "+str(gobuster_threads)+" -w "+gobuster_dictionary+" -d "+domain+" -o "+output_directory+"/"+gobuster_output_file+"_"+domain+"; "
+		sublist3r_cmd      += "echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; " + python_bin + " " + sublist3r_file + " -d " + domain +" -o "+output_directory+"/"+sublist3r_output_file+"_"+domain+"; "
 		current_location = os.getcwd() + "/"
 		theharvester_cmd   += "echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; cd "+harvester_location+" && "+python_bin+" theHarvester.py -d " + domain + " -b google | grep -v cmartorella | grep '@' >> "+current_location+output_directory+"/"+harvester_output_file+"; "
-		pwndb_cmd          += "echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; " + python_bin +" "+ pwndb_script_file + " --target @" + domain + " | grep '@' | grep -v donate | awk '{print $2}' >> "+output_directory+"/"+pwndb_output_file+"; "
+		pwndb_cmd          += "echo "+str(d+1)+"/"+str(len(domains))+" "+domain+"; " + python_bin + " " + pwndb_script_file + " --target @" + domain + " | grep '@' | grep -v donate | awk '{print $2}' >> "+output_directory+"/"+pwndb_output_file+"; "
 	gobuster_cmd     += "echo Finished"
 	theharvester_cmd += "echo Finished"
 	pwndb_cmd        += "echo Finished"
+	sublist3r_cmd    += "echo Finished"
 	commands = []
 	commands.append({"title":"Amass - Passive Scan Mode", "command": amass_cmd, "active": amass_active})
 	commands.append({"title":"DNSDumpster - Subdomains", "command": dnsdumpster_cmd, "active": dnsdumpster_active})
 	commands.append({"title":"FDNS - Subdomain lister", "command": fdns_cmd, "active": fdns_active})
 	commands.append({"title":"Gobuster - Subdomain bruteforce", "command": gobuster_cmd, "active": gobuster_active})
+	commands.append({"title":"Sublist3r", "command": sublist3r_cmd, "active": sublist3r_active})
 	commands.append({"title":"TheHarvester", "command": theharvester_cmd, "active": theharvester_active})
 	commands.append({"title":"Pwndb", "command": pwndb_cmd, "active": pwndb_active})
 	return commands
@@ -81,8 +85,6 @@ def create_tmux_file(commands, output_directory):
 
 
 def create_tmux_session(output_directory):
-	#tmux_cmd = "tmuxp load "+output_directory+""+tmuxp_yaml_file+"; echo a"
-	#tmux_gnome_cmd = 'gnome-terminal --tab -q -- bash -c "echo; {0}; exec bash" 2>/dev/null'.format(tmux_cmd)
 	os.system("tmuxp load "+output_directory+""+tmuxp_yaml_file+";")
 
 
@@ -146,7 +148,7 @@ def calculate_subdomain_info(output_directory, workbook, ranges, unique_subdomai
 	col = 0
 	row += 1
 	ip_list = []
-	print("Calculating data from "+str(len(unique_subdomains))+" total entries")
+	print("\nCalculating data from "+str(len(unique_subdomains))+" total entries")
 	csv_file = open(output_directory+"subdomain_by_source.csv","w+") 
 	writer = csv.writer(csv_file)
 	writer.writerow(["Subdomain", "Source", "IP", "Reversed IP", "IP in range"])
@@ -177,8 +179,6 @@ def calculate_subdomain_info(output_directory, workbook, ranges, unique_subdomai
 
 def get_subdomain_info(res_files, workbook):
 	for f in res_files:
-		print("Res file name "+f['name'])
-		print("Res file code "+f['code'])
 		f_name = f['name']
 		if os.path.isfile(f_name):
 			file_values = open(f_name).read().splitlines()
@@ -189,7 +189,7 @@ def get_subdomain_info(res_files, workbook):
 						file_values.remove(fv)
 						print ("Not analyzing %s, %s"%(fv,str(len(file_values))))
 			file_values.sort()
-			print("Calculating data from "+str(len(file_values))+" entries in "+f_name)
+			print("Calculating data from "+str(len(file_values))+" entries from "+f['code'])
 			for v in file_values:
 				if len(v) > 2:
 					source_ = f['code']
@@ -207,7 +207,7 @@ def get_unique_subdomains(output_dir, workbook):
 	col = 0
 	csv_file = open(output_dir+"unique_subdomains.txt","w+") 
 	writer = csv.writer(csv_file)
-	print("\n"+"-"*25+"\n"+"Unique subdomains: "+str(len(unique_subdomains))+"\n"+"-"*25)
+	print("\n"+"-"*25+"\n"+"Subdomains (total: "+str(len(unique_subdomains))+")\n"+"-"*25)
 	worksheet = workbook.add_worksheet("Unique subdomains")
 	for u in sorted(unique_subdomains, key=unique_subdomains.get):
 		print("- %s" % u)
@@ -279,37 +279,41 @@ def get_domains(output_directory, workbook, domains_file):
 	csv_file = open(output_directory+"main_domains.txt","w+")
 	writer = csv.writer(csv_file)
 	worksheet = workbook.add_worksheet("Main domains")
+	print("-------------------------\nDomains (total: "+str(len(domains_))+")\n-------------------------")
 	for d in domains_:
 		if d != "":
 			print("- %s" % d)
 			worksheet.write(row, col, d)
 			writer.writerow([d])
 			row += 1
+	print(" ")
 
 
-def join_gobuster_files(output_directory,gobuster_output_file):
-	gobuster_domains = []
+def parse_files(output_directory,final_file):
+	list_domains = []
 	for f in os.listdir(output_directory):
-		if f.startswith(gobuster_output_file):
+		if f.startswith(final_file):
 			file_values = open(output_directory+f).read().splitlines()
 			for v in file_values:
 				if "Found" in v:
-					gobuster_domains.append(v.split(" ")[1])
-		with open(output_directory+gobuster_output_file, 'w') as txt_file:
-			for dom in gobuster_domains:
+					list_domains.append(v.split(" ")[1])
+				else:
+					list_domains.append(v)
+		with open(output_directory+final_file, 'w') as txt_file:
+			for dom in list_domains:
 				txt_file.write(dom+ "\n")
 
 
 def analyze(output_directory, ranges, ranges_info, domains_file, dont_list_subdomains):
-	res_files = [{'name': output_directory+amass_output_file,'code':'Amass'},{'name': output_directory+dnsdumpster_output_file,'code':'DNSDumpster API'},{'name': output_directory+gobuster_output_file,'code':'Gobuster'},{'name': output_directory+fdns_output_file,'code':'FDNS'}]
+	res_files = [{'name': output_directory+amass_output_file,'code':'Amass'},{'name': output_directory+dnsdumpster_output_file,'code':'DNSDumpster API'},{'name': output_directory+sublist3r_output_file,'code':'Sublist3r'},{'name': output_directory+gobuster_output_file,'code':'Gobuster'},{'name': output_directory+fdns_output_file,'code':'FDNS'}]
 	workbook = xlsxwriter.Workbook(output_directory+"results.xlsx")
 	# Main domains
 	if domains_file is not None:
 		get_domains(output_directory, workbook, domains_file)
-		#???? {'name': output_directory+domains_file,'code':'Dig (IP range)'}
 	if not dont_list_subdomains:
-		# Parse Gobuster files
-		join_gobuster_files(output_directory,gobuster_output_file)
+		# Parse and join Gobuster and Sublist3r files
+		parse_files(output_directory,gobuster_output_file)
+		parse_files(output_directory,sublist3r_output_file)
 		# Subdomains by source
 		unique_subdomains = get_subdomain_info(res_files, workbook)
 		# IP list
@@ -444,16 +448,16 @@ def main():
 			commands = get_commands(domains_file, output_directory)
 			create_tmux_file(commands, output_directory)
 			create_tmux_session(output_directory)
-			print("Press: \n - 'p': Process the files now\n - 'k': Kill the TMUX session \n - Other key: Quit and process the results later (Option '-p')\n")
-			user_input = input("Option: ")
+			print("Options:\n\n - 'p': Process the files now\n - 'k': Kill the TMUX session \n - Other: Quit and process the results later with parameter '-p'\n")
+			user_input = input("Press a key: ")
 			if user_input == 'p' or user_input == 'P':
-				print("Analyzing files...\n")
+				print("\nAnalyzing files...\n")
 				analyze(output_directory, ranges, ranges_info, domains_file, dont_list_subdomains)
 			elif user_input == 'k' or user_input == 'K':
-				print("Killing TMUX session...")
+				print("\nKilling TMUX session...")
 				kill()
 			else:
-				print("Exiting...")
+				print("\nExiting...")
 				sys.exit(1)
 	else:
 		analyze(output_directory, ranges, ranges_info, domains_file, dont_list_subdomains)
