@@ -38,9 +38,11 @@ You can decide which programs are used for subdomain calculation setting the val
 
     * **gobuster_active** - Use [Gobuster](https://github.com/OJ/gobuster) in bruteforce mode with a custom dictionary (using [this](https://github.com/danielmiessler/SecLists) by default)
 
+    * **sublist3r_active** - Use [Sublist3r](https://github.com/aboul3la/Sublist3r)
+
     * **dnsdumpster_active** - Use the [DNSDumpster unofficial API](https://github.com/PaulSec/API-dnsdumpster.com)
 
-    * **fdns_active** - Use [FDNS](https://opendata.rapid7.com/sonar.fdns_v2/) after [downloading the file](https://opendata.rapid7.com/sonar.fdns_v2/) and setting its path
+    * **fdns_active** - Use [FDNS](https://opendata.rapid7.com/sonar.fdns_v2/). For this, [download this file](https://opendata.rapid7.com/sonar.fdns_v2/) and set its path in [config.py](https://github.com/ricardojoserf/subdoler/blob/master/config.py)
 
 * Options to enumerate leaked information:
 
