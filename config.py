@@ -20,6 +20,7 @@ theharvester_active = True
 pwndb_active = True
 dig_timeout = 5
 blacklist_words = "akamai,telefonica,microsoft"
+tmux_session_name = "subdoler"
 
 # Temporary files 
 temp_domains_file =         "subdoler_temp_domains"

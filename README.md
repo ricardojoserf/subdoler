@@ -55,14 +55,6 @@ You can decide which programs are used for subdomain calculation setting the val
 ```
 git clone https://github.com/ricardojoserf/subdoler
 cd subdoler/install
-python3 setup.py install install_dependencies clean
-```
-
-Or:
-
-```
-git clone https://github.com/ricardojoserf/subdoler
-cd subdoler/install
 sh install.sh
 ```
 

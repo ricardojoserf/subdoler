@@ -67,7 +67,7 @@ def get_commands(domains_file, output_directory):
 def create_tmux_file(commands, output_directory):
 	os.system("tmux kill-session -t subdoler 2>/dev/null")
 	f = open(output_directory+"/"+tmuxp_yaml_file,"w")
-	f.write("session_name: subdoler"+"\n")
+	f.write("session_name: "+tmux_session_name+"\n")
 	f.write("windows:"+"\n")
 	f.write("- window_name: dev window"+"\n")
 	f.write("  layout: tiled"+"\n")
@@ -401,7 +401,7 @@ def delete_blacklisted_terms(output_directory, domains_file):
 	
 
 def kill():
-	os.system("tmux kill-session -t subdoler")
+	os.system("tmux kill-session -t "+tmux_session_name)
 	sys.exit(1)
 
 
