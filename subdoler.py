@@ -444,17 +444,17 @@ def main():
 			commands = get_commands(domains_file, output_directory)
 			create_tmux_file(commands, output_directory)
 			create_tmux_session(output_directory)
-			print("Press: \n - 'q' to quit and process the results later with 'python3 subdoler.py -p -d OUTPUT_DIRECTORY'\n - 'k' to kill the TMUX session \n - Any other key to process the results now\n")
-			user_input = input("Option:")
-			if user_input == 'q':
-				print("Exiting...")
-				sys.exit(1)
-			elif user_input == 'k':
+			print("Press: \n - 'p': Process the files now\n - 'k': Kill the TMUX session \n - Other key: Quit and process the results later (Option '-p')\n")
+			user_input = input("Option: ")
+			if user_input == 'p' or user_input == 'P':
+				print("Analyzing files...\n")
+				analyze(output_directory, ranges, ranges_info, domains_file, dont_list_subdomains)
+			elif user_input == 'k' or user_input == 'K':
 				print("Killing TMUX session...")
 				kill()
 			else:
-				print("Analyzing files...\n")
-				analyze(output_directory, ranges, ranges_info, domains_file, dont_list_subdomains)
+				print("Exiting...")
+				sys.exit(1)
 	else:
 		analyze(output_directory, ranges, ranges_info, domains_file, dont_list_subdomains)
 
