@@ -356,7 +356,7 @@ def print_usage():
 	print(" + -r: File of IP ranges. Ex: ./subdoler.py -r /tmp/ip_ranges.txt")
 	print(" + -R: List of IP ranges. Ex: ./subdoler.py -R 10.20.30.40/24,11.21.31.41/22")
 	print(" + -d: File of domains.   Ex: ./subdoler.py -d /tmp/domains.txt")
-	print(" + -R: List of domains.   Ex: ./subdoler.py -D company1.com,company2.es")
+	print(" + -D: List of domains.   Ex: ./subdoler.py -D company1.com,company2.es")
 	print(" + -k: Kill tmux session. Ex: ./subdoler.py -k")
 	print("\nOptional arguments:")
 	print(" + -o:  Output directory. Ex: ./subdoler.py -c /tmp/companies.txt -o /tmp/subdoler_results")
